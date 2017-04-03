@@ -1,13 +1,8 @@
 .. contents::
 
-PLONE.SERVER.GOOGLEOAUTH
-========================
+GUILLOTINA_OAUTH
+================
 
-A call to plone.server using header : 
-
-AUTHORIZATION: bearer GOOGLE_TOKEN
-
-authorizes the user to the one in google with that token
 
 Features
 --------
@@ -20,15 +15,16 @@ Features
 Configuration
 -------------
 
-Generic global configuration on plone.server utilities section: 
+Generic global configuration on guillotina utilities section:
 
 {
-    "provides": "plone.server.googleoauth.oauth.IOAuth",
-    "factory": "plone.server.googleoauth.oauth.OAuth",
-    "settings": {
-        "oauth_json": "PATH_TO_JSON_CREDENTIALS_FROM_GOOGLE",
-        "credentials": "CREDENTIALS_STORAGE",
-        "client": "plone"
+    "applicatoins": ["guillotina_oauth"],
+    "oauth_settings": {
+        "server": "http://localhost/",
+        "jwt_secret": "secret",
+        "jwt_algorithm": "HS256",
+        "client_id": 11,
+        "client_password": "secret"
     }
 }
 
@@ -40,7 +36,7 @@ POST SITE_URL/@install
 
 {
 	'pluggins': [
-		'plone.server.googleoauth'
+		'guillotina.googleoauth'
 	]
 }
 
@@ -51,7 +47,7 @@ POST SITE_URL/@uninstall
 
 {
 	'pluggins': [
-		'plone.server.googleoauth'
+		'guillotina.googleoauth'
 	]
 }
 
@@ -59,4 +55,4 @@ POST SITE_URL/@uninstall
 Events
 ------
 
-plone.server.auth.events.NewUserLogin
+guillotina.auth.events.NewUserLogin

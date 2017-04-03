@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-from plone.server.addons import Addon
-from plone.server.registry import ILayers
-from plone.server import configure
+from guillotina import configure
+from guillotina.addons import Addon
+from guillotina.interfaces import ILayers
 
-POAUTH_LAYER = 'pserver.oauth.interfaces.IPOAuthLayer'
+
+POAUTH_LAYER = 'guillotina_oauth.interfaces.IPOAuthLayer'
 
 
 @configure.addon(

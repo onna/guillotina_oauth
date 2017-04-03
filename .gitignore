@@ -2,3 +2,8 @@
 *.pyc
 .eggs
 __pycache__
+.cache/
+extras/
+include/
+lib/
+pip-selfcheck.json

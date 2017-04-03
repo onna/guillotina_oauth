@@ -1,7 +1,6 @@
 {
-    "provides": "pserver.oauth.oauth.IOAuth",
-    "factory": "pserver.oauth.oauth.OAuth",
-    "settings": {
+    "applicatoins": ["guillotina_oauth"],
+    "oauth_settings": {
         "server": "http://localhost/",
         "jwt_secret": "secret",
         "jwt_algorithm": "HS256",

@@ -1,28 +1,26 @@
 # -*- coding: utf-8 -*-
-import logging
+from aiohttp.web_exceptions import HTTPUnauthorized
 from calendar import timegm
 from datetime import datetime
+from guillotina import app_settings
+from guillotina import configure
+from guillotina.api.content import DefaultOPTIONS
+from guillotina.api.service import Service
+from guillotina.async import IAsyncUtility
+from guillotina.auth.users import GuillotinaUser
+from guillotina.browser import Response
+from guillotina.component import getUtility
+from guillotina.interfaces import Allow
+from guillotina.interfaces import IContainer
 
 import aiohttp
 import asyncio
 import jwt
+import logging
 import time
-from plone.server.api.service import Service
-from plone.server.async import IAsyncUtility
-from plone.server.auth.users import PloneUser
-from zope.component import getUtility
-from plone.server.interfaces import Allow
-from plone.server import app_settings
-from plone.server.api.content import DefaultOPTIONS
-from plone.server.browser import Response
-from aiohttp.web_exceptions import HTTPUnauthorized
-from plone.server import configure
-from plone.server.interfaces import IApplication
-from plone.server.interfaces import ISite
-from plone.server.interfaces import IResource
 
 
-logger = logging.getLogger('pserver.oauth')
+logger = logging.getLogger('guillotina_oauth')
 
 # Asyncio Utility
 NON_IAT_VERIFY = {
@@ -52,14 +50,24 @@ REST_API = {
 }
 
 
+@configure.utility(provides=IOAuth)
 class OAuth(object):
     """Object implementing OAuth Utility."""
 
-    def __init__(self, settings):
-        self.settings = settings
-        self._server = settings['server']
-        self._client_id = settings['client_id']
-        self._client_password = settings['client_password']
+    def __init__(self, settings=None, loop=None):
+        self.loop = loop
+
+    @property
+    def server(self):
+        return app_settings['oauth_settings']['servert']
+
+    @property
+    def client_id(self):
+        return app_settings['oauth_settings']['client_id']
+
+    @property
+    def client_password(self):
+        return app_settings['oauth_settings']['client_password']
 
     async def initialize(self, app=None):
         self.app = app
@@ -94,8 +102,8 @@ class OAuth(object):
                 return self._service_token['service_token']
         logger.info('SERVICE TOKEN OBTAIN')
         result = await self.call_auth('getServiceToken', {
-            'client_id': self._client_id,
-            'client_secret': self._client_password,
+            'client_id': self.client_id,
+            'client_secret': self.client_password,
             'grant_type': 'service'
         })
         if result:
@@ -115,7 +123,7 @@ class OAuth(object):
                 'service_token': self._service_token['service_token'],
                 'scope': scope
             },
-            headers = header
+            headers=header
         )
         return result
 
@@ -164,9 +172,9 @@ class OAuth(object):
         result = None
         with aiohttp.ClientSession() as session:
             if method == 'GET':
-                logger.debug('GET ' + self._server + url)
+                logger.debug('GET ' + self.server + url)
                 async with session.get(
-                        self._server + url,
+                        self.server + url,
                         params=params,
                         headers=headers,
                         timeout=30) as resp:
@@ -190,9 +198,9 @@ class OAuth(object):
                                 await resp.text()))
                     await resp.release()
             elif method == 'POST':
-                logger.debug('POST ' + self._server + url)
+                logger.debug('POST ' + self.server + url)
                 async with session.post(
-                        self._server + url,
+                        self.server + url,
                         data=params,
                         headers=headers,
                         timeout=30) as resp:
@@ -280,7 +288,7 @@ class OAuthJWTValidator(object):
             tdif = t1 - time.time()
             print('Time OAUTH %f' % tdif)
             if result:
-                user = OAuthPloneUser(self.request, result)
+                user = OAuthGuillotinaUser(self.request, result)
                 user.name = validated_jwt['name']
                 user.token = validated_jwt['token']
                 if user and user.id == token['id']:
@@ -292,10 +300,10 @@ class OAuthJWTValidator(object):
         return None
 
 
-class OAuthPloneUser(PloneUser):
+class OAuthGuillotinaUser(GuillotinaUser):
 
     def __init__(self, request, data):
-        super(OAuthPloneUser, self).__init__(request)
+        super(OAuthGuillotinaUser, self).__init__(request)
         self._init_data(data)
         self._properties = {}
 
@@ -311,29 +319,7 @@ class OAuthPloneUser(PloneUser):
             raise KeyError('Plone OAuth User has no roles in this Scope')
 
 
-@configure.service(context=IApplication, name='@oauthgetcode', method='GET',
-                   permission='plone.GetOAuthGrant')
-class GetCredentials(Service):
-
-    async def __call__(self):
-        oauth_utility = getUtility(IOAuth)
-        if 'client_id' in self.request.GET:
-            client_id = self.request.GET['client_id']
-        else:
-            client_id = oauth_utility._client_id
-
-        if hasattr(self.request, '_site_id'):
-            scope = self.request._site_id
-        else:
-            scope = self.request.GET['scope']
-
-        result = await oauth_utility.auth_code([scope], client_id)
-        return {
-            'auth_code': result
-        }
-
-
-@configure.service(context=ISite, name='@oauthgetcode', method='GET',
+@configure.service(context=IContainer, name='@oauthgetcode', method='GET',
                    permission='plone.GetOAuthGrant')
 class GetCredentials(Service):
 
@@ -344,7 +330,7 @@ class GetCredentials(Service):
         if 'client_id' in self.request.GET:
             client_id = self.request.GET['client_id']
         else:
-            client_id = oauth_utility._client_id
+            client_id = oauth_utility.client_id
 
         if hasattr(self.request, '_site_id'):
             scope = self.request._site_id
@@ -356,7 +342,8 @@ class GetCredentials(Service):
             'auth_code': result
         }
 
-@configure.service(context=ISite, name='@oauthgetcode', method='OPTIONS',
+
+@configure.service(context=IContainer, name='@oauthgetcode', method='OPTIONS',
                    permission='plone.GetOAuthGrant')
 class OptionsGetCredentials(DefaultOPTIONS):
 
@@ -377,7 +364,7 @@ class OptionsGetCredentials(DefaultOPTIONS):
         if 'client_id' in self.request.GET:
             client_id = self.request.GET['client_id']
         else:
-            client_id = oauth_utility._client_id
+            client_id = oauth_utility.client_id
 
         if hasattr(self.request, '_site_id'):
             scope = self.request._site_id
