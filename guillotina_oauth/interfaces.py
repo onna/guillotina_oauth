@@ -3,4 +3,4 @@ from zope.interface import Interface
 
 
 class IPOAuthLayer(Interface):
-    """Marker interface layer Plone.OAuth."""
+    """Marker interface layer guillotina.oauth."""

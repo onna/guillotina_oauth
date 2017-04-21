@@ -58,8 +58,12 @@ class OAuth(object):
         self.loop = loop
 
     @property
+    def configured(self):
+        return 'oauth_settings' in app_settings
+
+    @property
     def server(self):
-        return app_settings['oauth_settings']['servert']
+        return app_settings['oauth_settings']['server']
 
     @property
     def client_id(self):
@@ -112,7 +116,7 @@ class OAuth(object):
         return None
 
     async def getUsers(self, request):
-        scope = request.site.id
+        scope = request.container.id
         header = {
             'Authorization': request.headers['Authorization']
         }
@@ -128,7 +132,7 @@ class OAuth(object):
         return result
 
     async def searchUsers(self, request, page=0, num_x_page=30, term=''):
-        scope = request.site.id
+        scope = request.container.id
         header = {
             'Authorization': request.headers['Authorization']
         }
@@ -150,7 +154,7 @@ class OAuth(object):
         return result
 
     async def validate_token(self, request, token):
-        scope = request.site.id
+        scope = request.container.id
         result = await self.call_auth(
             'validToken',
             params={
@@ -271,7 +275,7 @@ class OAuthJWTValidator(object):
             #    # We validate that the actual token belongs to the same
             #    # as the user on oauth
 
-            scope = self.request._site_id if hasattr(self.request, '_site_id') else 'root'
+            scope = self.request._container_id if hasattr(self.request, '_container_id') else 'root'
             t1 = time.time()
             result = await oauth_utility.call_auth(
                 'getUser',
@@ -316,11 +320,11 @@ class OAuthGuillotinaUser(GuillotinaUser):
         self.id = user_data['mail']
         if len(self._roles) == 0:
             logger.error('User without roles in this scope')
-            raise KeyError('Plone OAuth User has no roles in this Scope')
+            raise KeyError('Guillotina OAuth User has no roles in this Scope')
 
 
 @configure.service(context=IContainer, name='@oauthgetcode', method='GET',
-                   permission='plone.GetOAuthGrant')
+                   permission='guillotina.GetOAuthGrant')
 class GetCredentials(Service):
 
     __allow_access__ = True
@@ -332,8 +336,8 @@ class GetCredentials(Service):
         else:
             client_id = oauth_utility.client_id
 
-        if hasattr(self.request, '_site_id'):
-            scope = self.request._site_id
+        if hasattr(self.request, '_container_id'):
+            scope = self.request._container_id
         else:
             scope = self.request.GET['scope']
 
@@ -344,7 +348,7 @@ class GetCredentials(Service):
 
 
 @configure.service(context=IContainer, name='@oauthgetcode', method='OPTIONS',
-                   permission='plone.GetOAuthGrant')
+                   permission='guillotina.GetOAuthGrant')
 class OptionsGetCredentials(DefaultOPTIONS):
 
     async def __call__(self):
@@ -366,8 +370,8 @@ class OptionsGetCredentials(DefaultOPTIONS):
         else:
             client_id = oauth_utility.client_id
 
-        if hasattr(self.request, '_site_id'):
-            scope = self.request._site_id
+        if hasattr(self.request, '_container_id'):
+            scope = self.request._container_id
         else:
             scope = self.request.GET['scope']
 
