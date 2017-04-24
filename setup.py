@@ -4,14 +4,17 @@ from setuptools import setup
 
 setup(
     name='guillotina_oauth',
+    description='guillotina oauth support',
     version=open('VERSION').read().strip(),
     long_description=(open('README.rst').read() + '\n' +
                       open('CHANGELOG.rst').read()),
     classifiers=[
-        'Framework :: Plone :: 7.0',
-        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
+    keywords='guillotina oauth',
+    author='Ramon Navarro Bosch',
+    author_email='ramon@plone.org',
     url='https://pypi.python.org/pypi/guillotina_oauth',
     license='GPL version 3',
     setup_requires=[
