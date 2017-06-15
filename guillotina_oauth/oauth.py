@@ -12,6 +12,7 @@ from guillotina.browser import Response
 from guillotina.component import getUtility
 from guillotina.interfaces import Allow
 from guillotina.interfaces import IContainer
+from guillotina.exceptions import Unauthorized
 
 import aiohttp
 import asyncio
@@ -297,9 +298,13 @@ class OAuthJWTValidator(object):
                 }
             )
             tdif = t1 - time.time()
-            print('Time OAUTH %f' % tdif)
+            logger.info('Time OAUTH %f' % tdif)
             if result:
-                user = OAuthGuillotinaUser(self.request, result)
+                try:
+                    user = OAuthGuillotinaUser(self.request, result)
+                except Unauthorized:
+                    return None
+
                 user.name = validated_jwt['name']
                 user.token = validated_jwt['token']
                 if user and user.id == token['id']:
@@ -327,7 +332,7 @@ class OAuthGuillotinaUser(GuillotinaUser):
         self.id = user_data['mail']
         if len(self._roles) == 0:
             logger.error('User without roles in this scope')
-            raise KeyError('Guillotina OAuth User has no roles in this Scope')
+            raise Unauthorized('Guillotina OAuth User has no roles in this Scope')
 
 
 @configure.service(context=IContainer, name='@oauthgetcode', method='GET',
