@@ -1,7 +1,8 @@
 1.0.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Handle oauth errors on connecting to invalid server
+  [vangheem]
 
 
 1.0.2 (2017-06-16)

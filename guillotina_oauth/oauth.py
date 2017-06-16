@@ -84,10 +84,15 @@ class OAuth(object):
         while True:
             logger.debug('Renew token')
             now = timegm(datetime.utcnow().utctimetuple())
-            await self.service_token
-            expiration = self._service_token['exp']
-            time_to_sleep = expiration - now
-            await asyncio.sleep(time_to_sleep)
+            try:
+                await self.service_token
+                expiration = self._service_token['exp']
+                time_to_sleep = expiration - now
+                await asyncio.sleep(time_to_sleep)
+            except (aiohttp.client_exceptions.ClientConnectorError,
+                    ConnectionRefusedError):
+                logger.warn('Could not connect to oauth host, oauth will not work')
+                break
 
     async def finalize(self, app=None):
         pass
