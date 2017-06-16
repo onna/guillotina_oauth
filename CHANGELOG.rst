@@ -1,4 +1,4 @@
-1.0.3 (unreleased)
+1.0.3 (2017-06-16)
 ------------------
 
 - Handle oauth errors on connecting to invalid server
