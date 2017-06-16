@@ -1,7 +1,8 @@
 1.0.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Handle errors when no config is provided
+  [vangheem]
 
 
 1.0.1 (2017-06-15)

@@ -77,6 +77,10 @@ class OAuth(object):
     async def initialize(self, app=None):
         self.app = app
         self._service_token = None
+        if 'oauth_settings' not in app_settings:
+            logger.warn('No oauth settings found, oauth will not function')
+            return
+
         while True:
             logger.debug('Renew token')
             now = timegm(datetime.utcnow().utctimetuple())
