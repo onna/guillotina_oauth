@@ -63,6 +63,13 @@ class OAuth(object):
         return 'oauth_settings' in app_settings
 
     @property
+    def attr_id(self):
+        if 'attr_id' in app_settings['oauth_settings']:
+            return app_settings['oauth_settings']['attr_id']
+        else:
+            return 'mail'
+
+    @property
     def server(self):
         return app_settings['oauth_settings']['server']
 
@@ -310,7 +317,8 @@ class OAuthJWTValidator(object):
             logger.info('Time OAUTH %f' % tdif)
             if result:
                 try:
-                    user = OAuthGuillotinaUser(self.request, result)
+                    user = OAuthGuillotinaUser(
+                        self.request, result, oauth_utility.attr_id)
                 except Unauthorized:
                     return None
 
@@ -327,8 +335,9 @@ class OAuthJWTValidator(object):
 
 class OAuthGuillotinaUser(GuillotinaUser):
 
-    def __init__(self, request, data):
+    def __init__(self, request, data, attr_id='mail'):
         super(OAuthGuillotinaUser, self).__init__(request)
+        self._attr_id = attr_id
         self._init_data(data)
         self._properties = {}
 
@@ -338,7 +347,7 @@ class OAuthGuillotinaUser(GuillotinaUser):
             self._roles[key] = Allow
         self._groups = [key for key
                         in user_data['groups']]
-        self.id = user_data['mail']
+        self.id = user_data[self._attr_id]
         if len(self._roles) == 0:
             logger.error('User without roles in this scope')
             raise Unauthorized('Guillotina OAuth User has no roles in this Scope')
