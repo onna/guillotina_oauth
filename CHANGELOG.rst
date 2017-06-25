@@ -1,8 +1,8 @@
 1.0.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
+- User id on oauth may not be mail
+  [bloodbare]
 
 1.0.3 (2017-06-16)
 ------------------
