@@ -1,4 +1,4 @@
-1.0.4 (unreleased)
+1.0.4 (2017-06-25)
 ------------------
 
 - User id on oauth may not be mail
