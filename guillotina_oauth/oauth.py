@@ -36,18 +36,12 @@ class IOAuth(IAsyncUtility):
 
 
 REST_API = {
-    'getAuthCode': ['POST', 'get_authorization_code', True],
-    'getAuthToken': ['POST', 'get_auth_token', True],
-    'getServiceToken': ['POST', 'get_service_token', True],
-    'searchUser': ['POST', 'search_user', False],
-    'validToken': ['POST', 'valid_token', True],
-    'getUser': ['POST', 'get_user', False],
-    'getGroup': ['POST', 'get_group', False],
-    'getScopeUsers': ['POST', 'get_users', False],
-    'getScopes': ['GET', 'get_scopes', False],
-    'grantGlobalRoles': ['POST', 'grant_scope_roles', False],
-    'revokeGlobalRoles': ['POST', 'deny_scope_roles', False],
-    'searchUsers': ['POST', 'search_user', False]
+    'get_authorization_code': ['POST', True],
+    'get_service_token': ['POST', True],
+    'valid_token': ['POST', True],
+    'get_user': ['POST', False],
+    'get_users': ['POST', False],
+    'search_user': ['POST', 'search_user', False]
 }
 
 
@@ -105,7 +99,7 @@ class OAuth(object):
         pass
 
     async def auth_code(self, scope, client_id):
-        result = await self.call_auth('getAuthCode', {
+        result = await self.call_auth('get_authorization_code', {
             'client_id': client_id,
             'service_token': await self.service_token,
             'scopes': scope,
@@ -122,7 +116,7 @@ class OAuth(object):
             if self._service_token['exp'] > now:
                 return self._service_token['service_token']
         logger.info('SERVICE TOKEN OBTAIN')
-        result = await self.call_auth('getServiceToken', {
+        result = await self.call_auth('get_service_token', {
             'client_id': self.client_id,
             'client_secret': self.client_password,
             'grant_type': 'service'
@@ -139,7 +133,7 @@ class OAuth(object):
         }
 
         result = await self.call_auth(
-            'getScopeUsers',
+            'get_users',
             params={
                 'service_token': self._service_token['service_token'],
                 'scope': scope
@@ -164,7 +158,7 @@ class OAuth(object):
             'scope': scope
         }
         result = await self.call_auth(
-            'searchUsers',
+            'search_user',
             params=payload,
             headers=header
         )
@@ -173,7 +167,7 @@ class OAuth(object):
     async def validate_token(self, request, token):
         scope = request.container.id
         result = await self.call_auth(
-            'validToken',
+            'valid_token',
             params={
                 'code': self._service_token['service_token'],
                 'token': token,
@@ -187,8 +181,8 @@ class OAuth(object):
                 return None
         return None
 
-    async def call_auth(self, call, params, headers={}, future=None, **kw):
-        method, url, needs_decode = REST_API[call]
+    async def call_auth(self, url, params, headers={}, future=None, **kw):
+        method, needs_decode = REST_API[url]
 
         result = None
         with aiohttp.ClientSession() as session:
@@ -302,7 +296,7 @@ class OAuthJWTValidator(object):
             scope = self.request._container_id if hasattr(self.request, '_container_id') else 'root'
             t1 = time.time()
             result = await oauth_utility.call_auth(
-                'getUser',
+                'get_user',
                 params={
                     'service_token': await oauth_utility.service_token,
                     # 'user_token': validated_jwt['token'],
