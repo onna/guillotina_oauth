@@ -1,4 +1,4 @@
-1.0.7 (unreleased)
+1.0.7 (2017-07-24)
 ------------------
 
 - Allow user to validate without any roles from api
