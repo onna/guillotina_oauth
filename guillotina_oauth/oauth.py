@@ -11,7 +11,7 @@ from guillotina.auth.users import GuillotinaUser
 from guillotina.browser import Response
 from guillotina.component import getUtility
 from guillotina.interfaces import Allow
-from guillotina.interfaces import IContainer
+from guillotina.interfaces import IContainer, IApplication
 from guillotina.exceptions import Unauthorized
 
 import aiohttp
@@ -373,6 +373,8 @@ class GetCredentials(Service):
 
 @configure.service(context=IContainer, name='@oauthgetcode', method='OPTIONS',
                    permission='guillotina.GetOAuthGrant')
+@configure.service(context=IApplication, name='@oauthgetcode', method='OPTIONS',
+                   permission='guillotina.GetOAuthGrant')
 class OptionsGetCredentials(DefaultOPTIONS):
 
     async def __call__(self):
@@ -394,12 +396,13 @@ class OptionsGetCredentials(DefaultOPTIONS):
         else:
             client_id = oauth_utility.client_id
 
+        scopes = []
         if hasattr(self.request, '_container_id'):
-            scope = self.request._container_id
-        else:
-            scope = self.request.GET['scope']
+            scopes.append(self.request._container_id)
+        elif 'scope' in self.request.GET:
+            scopes.append(self.request.GET['scope'])
 
-        result = await oauth_utility.auth_code([scope], client_id)
+        result = await oauth_utility.auth_code(scopes, client_id)
         resp = {
             'auth_code': result
         }

@@ -1,7 +1,8 @@
 1.0.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- @oauthgetcode now works on application root as well as container
+  [vangheem]
 
 
 1.0.4 (2017-06-25)
