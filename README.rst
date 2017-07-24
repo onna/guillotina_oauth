@@ -19,6 +19,10 @@ Generic global configuration on guillotina utilities section:
 
 {
     "applicatoins": ["guillotina_oauth"],
+    "auth_token_validators": [
+        "guillotina.auth.validators.SaltedHashPasswordValidator",
+        "guillotina_oauth.oauth.OAuthJWTValidator"
+    ],
     "oauth_settings": {
         "server": "http://localhost/",
         "jwt_secret": "secret",
@@ -35,9 +39,9 @@ Installation on a site
 POST SITE_URL/@install
 
 {
-	'pluggins': [
-		'guillotina.googleoauth'
-	]
+  'pluggins': [
+    'guillotina.googleoauth'
+  ]
 }
 
 Uninstall on a site
@@ -46,9 +50,9 @@ Uninstall on a site
 POST SITE_URL/@uninstall
 
 {
-	'pluggins': [
-		'guillotina.googleoauth'
-	]
+  'pluggins': [
+    'guillotina.googleoauth'
+  ]
 }
 
 
