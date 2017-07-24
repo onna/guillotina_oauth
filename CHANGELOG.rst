@@ -1,7 +1,8 @@
 1.0.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Allow user to validate without any roles from api
+  [vangheem]
 
 
 1.0.6 (2017-07-24)

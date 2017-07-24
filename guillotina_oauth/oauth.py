@@ -342,9 +342,6 @@ class OAuthGuillotinaUser(GuillotinaUser):
         self._groups = [key for key
                         in user_data['groups']]
         self.id = user_data[self._attr_id]
-        if len(self._roles) == 0:
-            logger.error('User without roles in this scope')
-            raise Unauthorized('Guillotina OAuth User has no roles in this Scope')
 
 
 @configure.service(context=IApplication, name='@oauthgetcode', method='POST',
