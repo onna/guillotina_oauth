@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
-from aiohttp.web_exceptions import HTTPUnauthorized
-from calendar import timegm
-from datetime import datetime
-from guillotina import app_settings
-from guillotina import configure
-from guillotina.api.content import DefaultOPTIONS
-from guillotina.api.service import Service
-from guillotina.async import IAsyncUtility
-from guillotina.auth.users import GuillotinaUser
-from guillotina.browser import Response
-from guillotina.component import getUtility
-from guillotina.interfaces import Allow
-from guillotina.interfaces import IContainer, IApplication
-from guillotina.exceptions import Unauthorized
-
-import aiohttp
 import asyncio
-import jwt
+import json
 import logging
 import time
+from calendar import timegm
+from datetime import datetime
+
+import aiohttp
+from aiohttp.web_exceptions import HTTPUnauthorized
+
+import jwt
+from guillotina import app_settings
+from guillotina import configure
+from guillotina.async import IAsyncUtility
+from guillotina.auth.users import GuillotinaUser
+from guillotina.component import getUtility
+from guillotina.exceptions import Unauthorized
+from guillotina.interfaces import Allow
+from guillotina.interfaces import IApplication
+from guillotina.interfaces import IContainer
 
 
 logger = logging.getLogger('guillotina_oauth')
@@ -98,11 +98,11 @@ class OAuth(object):
     async def finalize(self, app=None):
         pass
 
-    async def auth_code(self, scope, client_id):
+    async def auth_code(self, scopes, client_id):
         result = await self.call_auth('get_authorization_code', {
             'client_id': client_id,
             'service_token': await self.service_token,
-            'scopes': scope,
+            'scopes': scopes,
             'response_type': 'code'
         })
         if result:
@@ -216,7 +216,7 @@ class OAuth(object):
                 logger.debug('POST ' + self.server + url)
                 async with session.post(
                         self.server + url,
-                        data=params,
+                        data=json.dumps(params),
                         headers=headers,
                         timeout=30) as resp:
                     if resp.status == 200:
@@ -347,63 +347,28 @@ class OAuthGuillotinaUser(GuillotinaUser):
             raise Unauthorized('Guillotina OAuth User has no roles in this Scope')
 
 
+@configure.service(context=IApplication, name='@oauthgetcode', method='POST',
+                   permission='guillotina.GetOAuthGrant', allow_access=True)
+@configure.service(context=IContainer, name='@oauthgetcode', method='POST',
+                   permission='guillotina.GetOAuthGrant', allow_access=True)
+@configure.service(context=IApplication, name='@oauthgetcode', method='GET',
+                   permission='guillotina.GetOAuthGrant', allow_access=True)
 @configure.service(context=IContainer, name='@oauthgetcode', method='GET',
-                   permission='guillotina.GetOAuthGrant')
-class GetCredentials(Service):
+                   permission='guillotina.GetOAuthGrant', allow_access=True)
+async def oauth_get_code(context, request):
+    oauth_utility = getUtility(IOAuth)
+    if 'client_id' in request.GET:
+        client_id = request.GET['client_id']
+    else:
+        client_id = oauth_utility.client_id
 
-    __allow_access__ = True
+    scopes = []
+    if hasattr(request, '_container_id'):
+        scopes.append(request._container_id)
+    elif 'scope' in request.GET:
+        scopes.append(request.GET['scope'])
 
-    async def __call__(self):
-        oauth_utility = getUtility(IOAuth)
-        if 'client_id' in self.request.GET:
-            client_id = self.request.GET['client_id']
-        else:
-            client_id = oauth_utility.client_id
-
-        if hasattr(self.request, '_container_id'):
-            scope = self.request._container_id
-        else:
-            scope = self.request.GET['scope']
-
-        result = await oauth_utility.auth_code([scope], client_id)
-        return {
-            'auth_code': result
-        }
-
-
-@configure.service(context=IContainer, name='@oauthgetcode', method='OPTIONS',
-                   permission='guillotina.GetOAuthGrant')
-@configure.service(context=IApplication, name='@oauthgetcode', method='OPTIONS',
-                   permission='guillotina.GetOAuthGrant')
-class OptionsGetCredentials(DefaultOPTIONS):
-
-    async def __call__(self):
-        headers = {}
-        allowed_headers = ['Content-Type'] + app_settings['cors']['allow_headers']
-        headers['Access-Control-Allow-Headers'] = ','.join(allowed_headers)
-        headers['Access-Control-Allow-Methods'] = ','.join(
-            app_settings['cors']['allow_methods'])
-        headers['Access-Control-Max-Age'] = str(app_settings['cors']['max_age'])
-        headers['Access-Control-Allow-Origin'] = ','.join(
-            app_settings['cors']['allow_origin'])
-        headers['Access-Control-Allow-Credentials'] = 'True'
-        headers['Access-Control-Expose-Headers'] = \
-            ', '.join(app_settings['cors']['allow_headers'])
-
-        oauth_utility = getUtility(IOAuth)
-        if 'client_id' in self.request.GET:
-            client_id = self.request.GET['client_id']
-        else:
-            client_id = oauth_utility.client_id
-
-        scopes = []
-        if hasattr(self.request, '_container_id'):
-            scopes.append(self.request._container_id)
-        elif 'scope' in self.request.GET:
-            scopes.append(self.request.GET['scope'])
-
-        result = await oauth_utility.auth_code(scopes, client_id)
-        resp = {
-            'auth_code': result
-        }
-        return Response(response=resp, headers=headers, status=200)
+    result = await oauth_utility.auth_code(scopes, client_id)
+    return {
+        'auth_code': result
+    }

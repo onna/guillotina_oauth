@@ -1,7 +1,11 @@
 1.0.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix use of OPTIONS for oauth endpoint
+  [vangheem]
+
+- make sure POST request pushes variables to oauth endpoint as json data
+  [vangheem]
 
 
 1.0.5 (2017-07-24)
