@@ -4,6 +4,9 @@ GUILLOTINA_OAUTH
 ================
 
 
+WARNING: development of this package has ceased...
+
+
 Features
 --------
 
