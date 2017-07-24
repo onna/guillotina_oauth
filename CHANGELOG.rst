@@ -1,4 +1,4 @@
-1.0.5 (unreleased)
+1.0.5 (2017-07-24)
 ------------------
 
 - @oauthgetcode now works on application root as well as container
