@@ -1,4 +1,4 @@
-1.0.6 (unreleased)
+1.0.6 (2017-07-24)
 ------------------
 
 - Fix use of OPTIONS for oauth endpoint
