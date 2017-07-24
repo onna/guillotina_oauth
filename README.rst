@@ -4,7 +4,7 @@ GUILLOTINA_OAUTH
 ================
 
 
-WARNING: development of this package has ceased...
+WARNING: this package requires a working plone.oauth server...
 
 
 Features
