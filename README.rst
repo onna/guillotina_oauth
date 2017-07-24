@@ -31,32 +31,3 @@ Generic global configuration on guillotina utilities section:
         "client_password": "secret"
     }
 }
-
-
-Installation on a site
-----------------------
-
-POST SITE_URL/@install
-
-{
-  'pluggins': [
-    'guillotina.googleoauth'
-  ]
-}
-
-Uninstall on a site
--------------------
-
-POST SITE_URL/@uninstall
-
-{
-  'pluggins': [
-    'guillotina.googleoauth'
-  ]
-}
-
-
-Events
-------
-
-guillotina.auth.events.NewUserLogin
