@@ -1,4 +1,4 @@
-1.0.10 (unreleased)
+1.0.10 (2017-08-04)
 -------------------
 
 - Log correct service token
