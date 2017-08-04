@@ -1,4 +1,4 @@
-1.0.8 (unreleased)
+1.0.8 (2017-08-04)
 ------------------
 
 - Handle errors better on renewing service tokens
