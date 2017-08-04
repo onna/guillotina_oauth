@@ -213,10 +213,9 @@ class OAuth(object):
                                 algorithms=[app_settings['jwt']['algorithm']],
                                 options=NON_IAT_VERIFY)
                     else:
+                        text = await resp.text()
                         logger.error(
-                            'OAUTH SERVER ERROR %d %s' % (
-                                resp.status,
-                                await resp.text()))
+                            f'OAUTH SERVER ERROR({url}) {resp.status} {text}')
                     await resp.release()
             elif method == 'POST':
                 logger.debug('POST ' + self.server + url)
@@ -242,10 +241,9 @@ class OAuth(object):
                         else:
                             result = await resp.json()
                     else:
+                        text = await resp.text()
                         logger.error(
-                            'OAUTH SERVER ERROR %d %s' % (
-                                resp.status,
-                                await resp.text()))
+                            f'OAUTH SERVER ERROR({url}) {resp.status} {text}')
                     await resp.release()
             session.close()
         if future is not None:
@@ -299,7 +297,7 @@ class OAuthJWTValidator(object):
             #    # We validate that the actual token belongs to the same
             #    # as the user on oauth
 
-            scope = self.request._container_id if hasattr(self.request, '_container_id') else 'root'
+            scope = getattr(self.request, '_container_id', 'root')
             t1 = time.time()
             result = await oauth_utility.call_auth(
                 'get_user',
