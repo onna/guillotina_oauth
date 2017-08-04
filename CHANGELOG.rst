@@ -1,7 +1,8 @@
 1.0.10 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Log correct service token
+  [vangheem]
 
 
 1.0.9 (2017-08-04)

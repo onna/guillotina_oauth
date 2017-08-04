@@ -125,8 +125,9 @@ class OAuth(object):
         })
         if result:
             self._service_token = result
-            logger.warn(f'New service token issued: {result[:10]}...')
-            return self._service_token['service_token']
+            raw_service_token = self._service_token['service_token']
+            logger.warn(f'New service token issued: {raw_service_token[:10]}...')
+            return raw_service_token
         else:
             logger.warn('No token returned from oauth')
         return None
