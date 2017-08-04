@@ -1,7 +1,8 @@
 1.0.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Handle errors better on renewing service tokens
+  [vangheem]
 
 
 1.0.7 (2017-07-24)
