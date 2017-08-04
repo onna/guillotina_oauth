@@ -1,15 +1,7 @@
 # -*- coding: utf-8 -*-
-import asyncio
-import json
-import logging
-import time
+from aiohttp.web_exceptions import HTTPUnauthorized
 from calendar import timegm
 from datetime import datetime
-
-import aiohttp
-from aiohttp.web_exceptions import HTTPUnauthorized
-
-import jwt
 from guillotina import app_settings
 from guillotina import configure
 from guillotina.async import IAsyncUtility
@@ -19,6 +11,13 @@ from guillotina.exceptions import Unauthorized
 from guillotina.interfaces import Allow
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
+
+import aiohttp
+import asyncio
+import json
+import jwt
+import logging
+import time
 
 
 logger = logging.getLogger('guillotina_oauth')
@@ -88,12 +87,15 @@ class OAuth(object):
             try:
                 await self.service_token
                 expiration = self._service_token['exp']
-                time_to_sleep = expiration - now
+                time_to_sleep = expiration - now - 60  # refresh before we run out of time...
                 await asyncio.sleep(time_to_sleep)
             except (aiohttp.client_exceptions.ClientConnectorError,
                     ConnectionRefusedError):
                 logger.warn('Could not connect to oauth host, oauth will not work')
-                break
+                await asyncio.sleep(10)  # wait 10 seconds before trying again
+            except:
+                logger.warn('Error renewing service token', exc_info=True)
+                await asyncio.sleep(30)  # unknown error, try again in 30 seconds
 
     async def finalize(self, app=None):
         pass
