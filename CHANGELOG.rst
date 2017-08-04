@@ -1,7 +1,8 @@
 1.0.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- More logging
+  [vangheem]
 
 
 1.0.8 (2017-08-04)

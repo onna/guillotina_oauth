@@ -115,9 +115,9 @@ class OAuth(object):
     async def service_token(self):
         if self._service_token:
             now = timegm(datetime.utcnow().utctimetuple())
-            if self._service_token['exp'] > now:
+            if (self._service_token['exp'] - 60) > now:
                 return self._service_token['service_token']
-        logger.info('SERVICE TOKEN OBTAIN')
+        logger.warn('Getting new service token')
         result = await self.call_auth('get_service_token', {
             'client_id': self.client_id,
             'client_secret': self.client_password,
@@ -125,7 +125,10 @@ class OAuth(object):
         })
         if result:
             self._service_token = result
+            logger.warn(f'New service token issued: {result[:10]}...')
             return self._service_token['service_token']
+        else:
+            logger.warn('No token returned from oauth')
         return None
 
     async def getUsers(self, request):
