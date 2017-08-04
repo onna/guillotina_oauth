@@ -1,7 +1,8 @@
 1.0.12 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Detect invalid service tokens and refresh
+  [vangheem]
 
 
 1.0.11 (2017-08-04)

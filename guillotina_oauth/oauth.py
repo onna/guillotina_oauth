@@ -111,12 +111,7 @@ class OAuth(object):
             return result['auth_code']
         return None
 
-    @property
-    async def service_token(self):
-        if self._service_token:
-            now = timegm(datetime.utcnow().utctimetuple())
-            if (self._service_token['exp'] - 60) > now:
-                return self._service_token['service_token']
+    async def refresh_service_token(self):
         logger.warn('Getting new service token')
         result = await self.call_auth('get_service_token', {
             'client_id': self.client_id,
@@ -130,7 +125,14 @@ class OAuth(object):
             return raw_service_token
         else:
             logger.warn('No token returned from oauth')
-        return None
+
+    @property
+    async def service_token(self):
+        if self._service_token:
+            now = timegm(datetime.utcnow().utctimetuple())
+            if (self._service_token['exp'] - 60) > now:
+                return self._service_token['service_token']
+        return await self.refresh_service_token()
 
     async def getUsers(self, request):
         scope = request.container.id
@@ -187,7 +189,8 @@ class OAuth(object):
                 return None
         return None
 
-    async def call_auth(self, url, params, headers={}, future=None, **kw):
+    async def call_auth(self, url, params, headers={}, future=None,
+                        retry=False, **kw):
         method, needs_decode = REST_API[url]
 
         result = None
@@ -212,11 +215,6 @@ class OAuth(object):
                                 app_settings['jwt']['secret'],
                                 algorithms=[app_settings['jwt']['algorithm']],
                                 options=NON_IAT_VERIFY)
-                    else:
-                        text = await resp.text()
-                        logger.error(
-                            f'OAUTH SERVER ERROR({url}) {resp.status} {text}')
-                    await resp.release()
             elif method == 'POST':
                 logger.debug('POST ' + self.server + url)
                 async with session.post(
@@ -240,11 +238,21 @@ class OAuth(object):
                                     options=NON_IAT_VERIFY)
                         else:
                             result = await resp.json()
-                    else:
-                        text = await resp.text()
-                        logger.error(
-                            f'OAUTH SERVER ERROR({url}) {resp.status} {text}')
+            if resp.status != 200:
+                # handle the error...
+                text = await resp.text()
+                if resp.status == 484 and not retry:  # bad service token status code
+                    logger.error('Invalid service token, refreshing')
+                    # try to get new one and retry this...
+                    await self.refresh_service_token()
                     await resp.release()
+                    session.close()
+                    return await self.call_auth(url, params, headers=headers,
+                                                future=future, retry=True, **kw)
+                else:
+                    logger.error(
+                        f'OAUTH SERVER ERROR({url}) {resp.status} {text}')
+            await resp.release()
             session.close()
         if future is not None:
             future.set_result(result)
@@ -298,11 +306,12 @@ class OAuthJWTValidator(object):
             #    # as the user on oauth
 
             scope = getattr(self.request, '_container_id', 'root')
+            service_token = await oauth_utility.service_token
             t1 = time.time()
             result = await oauth_utility.call_auth(
                 'get_user',
                 params={
-                    'service_token': await oauth_utility.service_token,
+                    'service_token': service_token,
                     # 'user_token': validated_jwt['token'],
                     'scope': scope,
                     'user': validated_jwt['login']
