@@ -1,4 +1,4 @@
-1.0.13 (unreleased)
+1.0.13 (2017-08-07)
 -------------------
 
 - override OPTIONS for @oauthgetcode
