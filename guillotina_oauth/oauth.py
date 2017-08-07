@@ -4,8 +4,10 @@ from calendar import timegm
 from datetime import datetime
 from guillotina import app_settings
 from guillotina import configure
+from guillotina.api.content import DefaultOPTIONS
 from guillotina.async import IAsyncUtility
 from guillotina.auth.users import GuillotinaUser
+from guillotina.browser import Response
 from guillotina.component import getUtility
 from guillotina.exceptions import Unauthorized
 from guillotina.interfaces import Allow
@@ -382,3 +384,23 @@ async def oauth_get_code(context, request):
     return {
         'auth_code': result
     }
+
+
+@configure.service(context=IContainer, name='@oauthgetcode', method='OPTIONS',
+                   permission='guillotina.GetOAuthGrant')
+class OptionsGetCredentials(DefaultOPTIONS):
+
+    async def __call__(self):
+        headers = {}
+        allowed_headers = ['Content-Type'] + app_settings['cors']['allow_headers']
+        headers['Access-Control-Allow-Headers'] = ','.join(allowed_headers)
+        headers['Access-Control-Allow-Methods'] = ','.join(
+            app_settings['cors']['allow_methods'])
+        headers['Access-Control-Max-Age'] = str(app_settings['cors']['max_age'])
+        headers['Access-Control-Allow-Origin'] = ','.join(
+            app_settings['cors']['allow_origin'])
+        headers['Access-Control-Allow-Credentials'] = 'True'
+        headers['Access-Control-Expose-Headers'] = \
+            ', '.join(app_settings['cors']['allow_headers'])
+
+        return Response(response='{}', headers=headers, status=200)

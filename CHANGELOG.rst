@@ -1,7 +1,8 @@
 1.0.13 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- override OPTIONS for @oauthgetcode
+  [vangheem]
 
 
 1.0.12 (2017-08-04)
