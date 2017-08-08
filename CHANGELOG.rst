@@ -1,7 +1,8 @@
 1.0.14 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- b/w compat OPTIONS call for getting auth code
+  [vangheem]
 
 
 1.0.13 (2017-08-07)

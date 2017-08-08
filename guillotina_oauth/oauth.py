@@ -403,4 +403,6 @@ class OptionsGetCredentials(DefaultOPTIONS):
         headers['Access-Control-Expose-Headers'] = \
             ', '.join(app_settings['cors']['allow_headers'])
 
-        return Response(response='{}', headers=headers, status=200)
+        resp = await oauth_get_code(self.context, self.request)
+        return Response(response=resp, headers=headers, status=200)
+
