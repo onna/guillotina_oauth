@@ -1,4 +1,4 @@
-1.0.14 (unreleased)
+1.0.14 (2017-08-08)
 -------------------
 
 - b/w compat OPTIONS call for getting auth code
