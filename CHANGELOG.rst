@@ -1,4 +1,4 @@
-1.0.15 (unreleased)
+1.0.15 (2017-08-09)
 -------------------
 
 - Be able to configure timeouts for oauth requests
