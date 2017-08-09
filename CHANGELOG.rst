@@ -1,7 +1,8 @@
 1.0.15 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Be able to configure timeouts for oauth requests
+  [vangheem]
 
 
 1.0.14 (2017-08-08)

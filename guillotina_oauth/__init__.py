@@ -2,6 +2,14 @@
 from guillotina import configure
 
 
+app_settings = {
+    "oauth_settings": {
+        "connect_timeout": 5,
+        "request_timeout": 30
+    }
+}
+
+
 def includeme(root):
     configure.permission('guillotina.GetOAuthGrant', 'Get OAuth Grant Code')
     configure.grant(

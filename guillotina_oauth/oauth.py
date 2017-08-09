@@ -55,7 +55,11 @@ class OAuth(object):
 
     @property
     def configured(self):
-        return 'oauth_settings' in app_settings
+        settings = app_settings.get('oauth_settings', {})
+        return ('server' in settings and
+                'jwt_secret' in settings and
+                'client_id' in settings,
+                'client_password' in settings)
 
     @property
     def attr_id(self):
@@ -76,18 +80,26 @@ class OAuth(object):
     def client_password(self):
         return app_settings['oauth_settings']['client_password']
 
+    @property
+    def conn_timeout(self):
+        return app_settings['oauth_settings']['connect_timeout']
+
+    @property
+    def timeout(self):
+        return app_settings['oauth_settings']['request_timeout']
+
     async def initialize(self, app=None):
         self.app = app
         self._service_token = None
-        if 'oauth_settings' not in app_settings:
-            logger.warn('No oauth settings found, oauth will not function')
+        if not self.configured:
+            logger.warn('OAuth not configured')
             return
 
         while True:
             logger.debug('Renew token')
             now = timegm(datetime.utcnow().utctimetuple())
             try:
-                await self.service_token
+                await self.refresh_service_token()
                 expiration = self._service_token['exp']
                 time_to_sleep = expiration - now - 60  # refresh before we run out of time...
                 await asyncio.sleep(time_to_sleep)
@@ -196,14 +208,14 @@ class OAuth(object):
         method, needs_decode = REST_API[url]
 
         result = None
-        with aiohttp.ClientSession() as session:
+        with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
             if method == 'GET':
                 logger.debug('GET ' + self.server + url)
                 async with session.get(
                         self.server + url,
                         params=params,
                         headers=headers,
-                        timeout=30) as resp:
+                        timeout=self.timeout) as resp:
                     if resp.status == 200:
                         try:
                             result = jwt.decode(
@@ -223,7 +235,7 @@ class OAuth(object):
                         self.server + url,
                         data=json.dumps(params),
                         headers=headers,
-                        timeout=30) as resp:
+                        timeout=self.timeout) as resp:
                     if resp.status == 200:
                         if needs_decode:
                             try:
@@ -405,4 +417,3 @@ class OptionsGetCredentials(DefaultOPTIONS):
 
         resp = await oauth_get_code(self.context, self.request)
         return Response(response=resp, headers=headers, status=200)
-
