@@ -1,7 +1,8 @@
 1.0.16 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Provide `auto_renew_token` setting to setting--useful in tests
+  [vangheem]
 
 
 1.0.15 (2017-08-09)

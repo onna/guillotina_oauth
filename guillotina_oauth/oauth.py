@@ -52,43 +52,46 @@ class OAuth(object):
 
     def __init__(self, settings=None, loop=None):
         self.loop = loop
+        self._service_token = None
+        self._settings = app_settings.get('oauth_settings', {})
 
     @property
     def configured(self):
-        settings = app_settings.get('oauth_settings', {})
-        return ('server' in settings and
-                'jwt_secret' in settings and
-                'client_id' in settings,
-                'client_password' in settings)
+        return ('server' in self._settings and
+                'jwt_secret' in self._settings and
+                'client_id' in self._settings,
+                'client_password' in self._settings)
 
     @property
     def attr_id(self):
-        if 'attr_id' in app_settings['oauth_settings']:
-            return app_settings['oauth_settings']['attr_id']
+        if 'attr_id' in self._settings:
+            return self._settings['attr_id']
         else:
             return 'mail'
 
     @property
     def server(self):
-        return app_settings['oauth_settings']['server']
+        return self._settings['server']
 
     @property
     def client_id(self):
-        return app_settings['oauth_settings']['client_id']
+        return self._settings['client_id']
 
     @property
     def client_password(self):
-        return app_settings['oauth_settings']['client_password']
+        return self._settings['client_password']
 
     @property
     def conn_timeout(self):
-        return app_settings['oauth_settings']['connect_timeout']
+        return self._settings['connect_timeout']
 
     @property
     def timeout(self):
-        return app_settings['oauth_settings']['request_timeout']
+        return self._settings['request_timeout']
 
     async def initialize(self, app=None):
+        if self._settings.get('disabled') is True:
+            return
         self.app = app
         self._service_token = None
         if not self.configured:
