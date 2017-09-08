@@ -90,10 +90,10 @@ class OAuth(object):
         return self._settings['request_timeout']
 
     async def initialize(self, app=None):
-        if self._settings.get('disabled') is True:
+        if self._settings.get('auto_renew_token') is False:
             return
+
         self.app = app
-        self._service_token = None
         if not self.configured:
             logger.warn('OAuth not configured')
             return

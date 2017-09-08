@@ -1,7 +1,8 @@
 1.0.17 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix release
+  [vangheem]
 
 
 1.0.16 (2017-09-08)
