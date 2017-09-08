@@ -1,4 +1,4 @@
-1.0.16 (unreleased)
+1.0.16 (2017-09-08)
 -------------------
 
 - Provide `auto_renew_token` setting to setting--useful in tests
