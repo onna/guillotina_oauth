@@ -1,7 +1,8 @@
 1.0.18 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Change various logging statements to "debug"
+  [vangheem]
 
 
 1.0.17 (2017-09-08)

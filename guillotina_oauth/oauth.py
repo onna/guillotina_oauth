@@ -95,7 +95,7 @@ class OAuth(object):
 
         self.app = app
         if not self.configured:
-            logger.warn('OAuth not configured')
+            logger.debug('OAuth not configured')
             return
 
         while True:
@@ -108,7 +108,7 @@ class OAuth(object):
                 await asyncio.sleep(time_to_sleep)
             except (aiohttp.client_exceptions.ClientConnectorError,
                     ConnectionRefusedError):
-                logger.warn('Could not connect to oauth host, oauth will not work')
+                logger.debug('Could not connect to oauth host, oauth will not work')
                 await asyncio.sleep(10)  # wait 10 seconds before trying again
             except:
                 logger.warn('Error renewing service token', exc_info=True)
@@ -129,7 +129,7 @@ class OAuth(object):
         return None
 
     async def refresh_service_token(self):
-        logger.warn('Getting new service token')
+        logger.debug('Getting new service token')
         result = await self.call_auth('get_service_token', {
             'client_id': self.client_id,
             'client_secret': self.client_password,
@@ -138,10 +138,10 @@ class OAuth(object):
         if result:
             self._service_token = result
             raw_service_token = self._service_token['service_token']
-            logger.warn(f'New service token issued: {raw_service_token[:10]}...')
+            logger.debug(f'New service token issued: {raw_service_token[:10]}...')
             return raw_service_token
         else:
-            logger.warn('No token returned from oauth')
+            logger.debug('No token returned from oauth')
 
     @property
     async def service_token(self):
