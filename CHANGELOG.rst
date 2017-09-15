@@ -1,4 +1,4 @@
-1.0.18 (unreleased)
+1.0.18 (2017-09-15)
 -------------------
 
 - Change various logging statements to "debug"
