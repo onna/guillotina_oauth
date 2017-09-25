@@ -13,12 +13,14 @@ from guillotina.exceptions import Unauthorized
 from guillotina.interfaces import Allow
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
+from lru import LRU
 
 import aiohttp
 import asyncio
 import json
 import jwt
 import logging
+import math
 import time
 
 
@@ -28,6 +30,10 @@ logger = logging.getLogger('guillotina_oauth')
 NON_IAT_VERIFY = {
     'verify_iat': False,
 }
+
+# cache user authorization for 1 minute so we don't hit oauth so much
+USER_CACHE_DURATION = 60 * 1
+USER_CACHE = LRU(1000)
 
 
 class IOAuth(IAsyncUtility):
@@ -284,6 +290,13 @@ class OAuthJWTValidator(object):
     def __init__(self, request):
         self.request = request
 
+    def get_user_cache_key(self, login):
+        return '{}-{}-{}'.format(
+            getattr(self.request, '_container_id', 'root'),
+            login,
+            math.ceil(math.ceil(time.time()) / USER_CACHE_DURATION)
+        )
+
     async def validate(self, token):
         """Return the user from the token."""
         if token.get('type') != 'bearer':
@@ -311,6 +324,10 @@ class OAuthJWTValidator(object):
                     options=NON_IAT_VERIFY)
 
             token['id'] = validated_jwt['login']
+
+            cache_key = self.get_user_cache_key(validated_jwt['login'])
+            if cache_key in USER_CACHE:
+                return USER_CACHE[cache_key]
 
             oauth_utility = getUtility(IOAuth)
 
@@ -349,6 +366,7 @@ class OAuthJWTValidator(object):
                 user.name = validated_jwt['name']
                 user.token = validated_jwt['token']
                 if user and user.id == token['id']:
+                    USER_CACHE[cache_key] = user
                     return user
 
         except jwt.exceptions.DecodeError:

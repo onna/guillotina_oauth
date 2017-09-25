@@ -1,7 +1,8 @@
 1.0.19 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Cache user object for 1 minute to lay off oauth server
+  [vangheem]
 
 
 1.0.18 (2017-09-15)
