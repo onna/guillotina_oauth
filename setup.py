@@ -28,6 +28,7 @@ setup(
         'guillotina',
         'ujson',
         'pyjwt',
+        'lru-dict'
     ],
     tests_require=[
         'pytest',
