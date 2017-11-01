@@ -48,7 +48,7 @@ REST_API = {
     'valid_token': ['POST', True],
     'get_user': ['POST', False],
     'get_users': ['POST', False],
-    'search_user': ['POST', 'search_user', False]
+    'search_user': ['POST', False]
 }
 
 
@@ -157,7 +157,7 @@ class OAuth(object):
                 return self._service_token['service_token']
         return await self.refresh_service_token()
 
-    async def getUsers(self, request):
+    async def get_users(self, request):
         scope = request.container.id
         header = {
             'Authorization': request.headers['Authorization']
@@ -172,8 +172,9 @@ class OAuth(object):
             headers=header
         )
         return result
+    getUsers = get_users
 
-    async def searchUsers(self, request, page=0, num_x_page=30, term=''):
+    async def search_users(self, request, page=0, num_x_page=30, term=''):
         scope = request.container.id
         header = {
             'Authorization': request.headers['Authorization']

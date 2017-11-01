@@ -1,7 +1,8 @@
 1.0.20 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix search_users
+  [vangheem]
 
 
 1.0.19 (2017-09-25)
