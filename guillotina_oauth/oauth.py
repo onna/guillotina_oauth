@@ -166,7 +166,7 @@ class OAuth(object):
         result = await self.call_auth(
             'get_users',
             params={
-                'service_token': self._service_token['service_token'],
+                'service_token': await self.service_token,
                 'scope': scope
             },
             headers=header
@@ -174,19 +174,20 @@ class OAuth(object):
         return result
     getUsers = get_users
 
-    async def search_users(self, request, page=0, num_x_page=30, term=''):
+    async def search_users(self, request, page=0, num_x_page=30, term='', search_attr='mail'):
         scope = request.container.id
         header = {
             'Authorization': request.headers['Authorization']
         }
 
+        criteria = {search_attr: f"{term}*"}
         payload = {
-            'criteria': '{"mail": "' + term + '*"}',
+            'criteria': json.dumps(criteria),
             'exact_match': False,
-            'attrs': '["mail"]',
+            'attrs': f'["{search_attr}"]',
             'page': page,
             'num_x_page': num_x_page,
-            'service_token': self._service_token['service_token'],
+            'service_token': await self.service_token,
             'scope': scope
         }
         result = await self.call_auth(
@@ -201,7 +202,7 @@ class OAuth(object):
         result = await self.call_auth(
             'valid_token',
             params={
-                'code': self._service_token['service_token'],
+                'code': await self.service_token,
                 'token': token,
                 'scope': scope
             }
