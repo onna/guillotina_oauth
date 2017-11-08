@@ -112,6 +112,9 @@ class OAuth(object):
                 expiration = self._service_token['exp']
                 time_to_sleep = expiration - now - 60  # refresh before we run out of time...
                 await asyncio.sleep(time_to_sleep)
+            except asyncio.CancelledError:
+                # we're good, die
+                return
             except (aiohttp.client_exceptions.ClientConnectorError,
                     ConnectionRefusedError):
                 logger.debug('Could not connect to oauth host, oauth will not work')
