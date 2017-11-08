@@ -1,4 +1,4 @@
-1.0.21 (unreleased)
+1.0.21 (2017-11-08)
 -------------------
 
 - Handle CancelledError
