@@ -1,7 +1,8 @@
 1.0.22 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Add get_user and add_user methods to utility
+  [vangheem]
 
 
 1.0.21 (2017-11-08)
