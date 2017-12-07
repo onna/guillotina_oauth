@@ -1,4 +1,4 @@
-1.0.22 (unreleased)
+1.0.22 (2017-12-07)
 -------------------
 
 - Add get_user and add_user methods to utility
