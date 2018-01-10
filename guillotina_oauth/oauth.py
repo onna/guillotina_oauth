@@ -419,6 +419,7 @@ class OAuthGuillotinaUser(GuillotinaUser):
         self._attr_id = attr_id
         self._init_data(data)
         self._properties = {}
+        self.data = data
 
     def _init_data(self, user_data):
         self._roles = {}

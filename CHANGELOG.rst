@@ -1,7 +1,8 @@
 1.0.23 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Store user data on authenticated user object
+  [vangheem]
 
 
 1.0.22 (2017-12-07)
