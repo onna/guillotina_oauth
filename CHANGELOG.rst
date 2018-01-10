@@ -1,4 +1,4 @@
-1.0.23 (unreleased)
+1.0.23 (2018-01-10)
 -------------------
 
 - Store user data on authenticated user object
