@@ -1,4 +1,4 @@
-1.0.24 (unreleased)
+1.0.24 (2018-01-15)
 -------------------
 
 - Send authorization header for `get_user`
