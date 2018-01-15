@@ -1,7 +1,8 @@
 1.0.24 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Send authorization header for `get_user`
+  [vangheem]
 
 
 1.0.23 (2018-01-10)

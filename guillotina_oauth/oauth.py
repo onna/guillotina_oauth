@@ -13,6 +13,7 @@ from guillotina.exceptions import Unauthorized
 from guillotina.interfaces import Allow
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
+from guillotina.utils import get_current_request
 from lru import LRU
 
 import aiohttp
@@ -218,6 +219,7 @@ class OAuth(object):
         return None
 
     async def get_user(self, username, scope):
+        request = get_current_request()
         data = {
             'user': username,
             'service_token': await self.service_token,
@@ -227,6 +229,9 @@ class OAuth(object):
             async with session.post(
                     self.server + 'get_user',
                     data=json.dumps(data),
+                    headers={
+                        'Authorization': request.headers.get('Authorization', '')
+                    },
                     timeout=self.timeout) as resp:
                 if resp.status == 200:
                     return await resp.json()
