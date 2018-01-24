@@ -1,4 +1,4 @@
-1.0.25 (unreleased)
+1.0.25 (2018-01-24)
 -------------------
 
 - Add get_temp_token and retrieve_temp_data methods
