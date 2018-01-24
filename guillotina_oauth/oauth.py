@@ -218,6 +218,40 @@ class OAuth(object):
                 return None
         return None
 
+    async def get_temp_token(self, request, payload={}, ttl=None):
+        request = get_current_request()
+        data = {
+            'payload': payload,
+            'service_token': await self.service_token,
+            'scope': request._container_id,
+            'client_id': self.client_id
+        }
+        if ttl:
+            data['ttl'] = ttl
+        with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
+            async with session.post(
+                    self.server + 'get_temp_token',
+                    data=json.dumps(data),
+                    headers={
+                        'Authorization': request.headers.get('Authorization', '')
+                    },
+                    timeout=self.timeout) as resp:
+                text = await resp.text()
+                if resp.status == 200:
+                    return text
+
+    async def retrieve_temp_data(self, request, token):
+        request = get_current_request()
+        with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
+            async with session.get(
+                    self.server + 'retrieve_temp_data?token=' + token,
+                    headers={
+                        'Authorization': request.headers.get('Authorization', '')
+                    },
+                    timeout=self.timeout) as resp:
+                if resp.status == 200:
+                    return await resp.json()
+
     async def get_user(self, username, scope):
         request = get_current_request()
         data = {
@@ -236,13 +270,18 @@ class OAuth(object):
                 if resp.status == 200:
                     return await resp.json()
 
-    async def add_user(self, username, email, password):
+    async def add_user(self, username, email, password, remind=True,
+                       reset_password=False, roles=None):
         data = {
             'user': username,
             'email': email,
             'password': password,
-            'service_token': await self.service_token
+            'service_token': await self.service_token,
+            'remind': remind,
+            'reset-password': reset_password
         }
+        if roles:
+            data['roles'] = roles
         with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
             async with session.post(
                     self.server + 'add_user',

@@ -1,7 +1,8 @@
 1.0.25 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Add get_temp_token and retrieve_temp_data methods
+  [vangheem]
 
 
 1.0.24 (2018-01-15)
