@@ -1,7 +1,8 @@
 1.0.26 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Support websocket tokens
+  [vangheem]
 
 
 1.0.25 (2018-01-24)

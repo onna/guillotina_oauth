@@ -366,7 +366,7 @@ class OAuth(object):
 
 class OAuthJWTValidator(object):
 
-    for_validators = ('bearer',)
+    for_validators = ('bearer', 'wstoken')
 
     def __init__(self, request):
         self.request = request
@@ -380,7 +380,7 @@ class OAuthJWTValidator(object):
 
     async def validate(self, token):
         """Return the user from the token."""
-        if token.get('type') != 'bearer':
+        if token.get('type') not in ('bearer', 'wstoken'):
             return None
 
         if '.' not in token.get('token', ''):
