@@ -1,4 +1,4 @@
-1.0.26 (unreleased)
+1.0.26 (2018-02-07)
 -------------------
 
 - Support websocket tokens
