@@ -1,4 +1,4 @@
-1.0.28 (unreleased)
+1.0.28 (2018-02-08)
 -------------------
 
 - Use send email instead of remind
