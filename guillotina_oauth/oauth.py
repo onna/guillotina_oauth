@@ -270,7 +270,7 @@ class OAuth(object):
                 if resp.status == 200:
                     return await resp.json()
 
-    async def add_user(self, username, email, password, remind=True,
+    async def add_user(self, username, email, password, send_email=True,
                        reset_password=False, roles=None):
         request = get_current_request()
         data = {
@@ -278,7 +278,7 @@ class OAuth(object):
             'email': email,
             'password': password,
             'service_token': await self.service_token,
-            'remind': remind,
+            'send-email': send_email,
             'reset-password': reset_password,
             'scope': getattr(request, '_container_id', None)
         }

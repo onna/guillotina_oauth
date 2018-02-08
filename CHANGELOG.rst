@@ -1,7 +1,8 @@
 1.0.28 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Use send email instead of remind
+  [vangheem]
 
 
 1.0.27 (2018-02-08)
