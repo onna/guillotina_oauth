@@ -1,7 +1,8 @@
 1.0.27 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix add_user
+  [vangheem]
 
 
 1.0.26 (2018-02-07)

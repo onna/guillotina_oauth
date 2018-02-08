@@ -272,26 +272,31 @@ class OAuth(object):
 
     async def add_user(self, username, email, password, remind=True,
                        reset_password=False, roles=None):
+        request = get_current_request()
         data = {
             'user': username,
             'email': email,
             'password': password,
             'service_token': await self.service_token,
             'remind': remind,
-            'reset-password': reset_password
+            'reset-password': reset_password,
+            'scope': getattr(request, '_container_id', None)
         }
         if roles:
             data['roles'] = roles
+        headers = {
+            'Authorization': request.headers.get('Authorization', '')
+        }
         with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
             async with session.post(
                     self.server + 'add_user',
                     data=json.dumps(data),
-                    timeout=self.timeout) as resp:
+                    timeout=self.timeout,
+                    headers=headers) as resp:
                 if resp.status == 200:
-                    try:
-                        return await resp.json()
-                    except Exception:
-                        logger.warn('Could not decode response', exc_info=True)
+                    return resp.status, await resp.json()
+                else:
+                    return resp.status, await resp.text()
 
     async def call_auth(self, url, params, headers={}, future=None,
                         retry=False, **kw):
