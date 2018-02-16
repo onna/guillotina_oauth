@@ -218,20 +218,21 @@ class OAuth(object):
                 return None
         return None
 
-    async def get_temp_token(self, request, payload={}, ttl=None):
+    async def get_temp_token(self, request, payload={}, ttl=None, clear=True):
         request = get_current_request()
         data = {
             'payload': payload,
             'service_token': await self.service_token,
             'scope': request._container_id,
-            'client_id': self.client_id
+            'client_id': self.client_id,
+            'clear': payload.pop('clear', clear)
         }
         if ttl:
             data['ttl'] = ttl
         with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
             async with session.post(
                     self.server + 'get_temp_token',
-                    data=json.dumps(data),
+                    json=data,
                     headers={
                         'Authorization': request.headers.get('Authorization', '')
                     },

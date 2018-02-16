@@ -1,7 +1,8 @@
 1.0.29 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Be able to clear from argument
+  [vangheem]
 
 
 1.0.28 (2018-02-08)
