@@ -1,4 +1,4 @@
-1.0.30 (unreleased)
+1.0.30 (2018-02-16)
 -------------------
 
 - Change default clear value
