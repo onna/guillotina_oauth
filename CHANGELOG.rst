@@ -1,3 +1,10 @@
+1.0.30 (unreleased)
+-------------------
+
+- Change default clear value
+  [vangheem]
+
+
 1.0.29 (2018-02-16)
 -------------------
 

@@ -218,7 +218,7 @@ class OAuth(object):
                 return None
         return None
 
-    async def get_temp_token(self, request, payload={}, ttl=None, clear=True):
+    async def get_temp_token(self, request, payload={}, ttl=None, clear=False):
         request = get_current_request()
         data = {
             'payload': payload,
