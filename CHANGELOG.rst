@@ -1,4 +1,4 @@
-1.0.29 (unreleased)
+1.0.29 (2018-02-16)
 -------------------
 
 - Be able to clear from argument
