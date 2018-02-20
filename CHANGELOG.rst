@@ -1,7 +1,8 @@
 1.0.31 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Add grant and revoke scope roles method
+  [vangheem]
 
 
 1.0.30 (2018-02-16)

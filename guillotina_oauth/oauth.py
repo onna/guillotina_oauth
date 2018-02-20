@@ -241,6 +241,41 @@ class OAuth(object):
                 if resp.status == 200:
                     return text
 
+    async def grant_scope_roles(self, request, user, roles=[]):
+        request = get_current_request()
+        with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
+            async with session.post(
+                    self.server + 'grant_scope_roles',
+                    json={
+                        "scope": request.container.id,
+                        "user": user,
+                        "roles": roles,
+                        'service_token': await self.service_token,
+                    },
+                    headers={
+                        'Authorization': request.headers.get('Authorization', '')
+                    },
+                    timeout=self.timeout) as resp:
+                if resp.status == 200:
+                    return await resp.json()
+
+    async def deny_scope_roles(self, request, user, roles=[]):
+        request = get_current_request()
+        with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
+            async with session.post(
+                    self.server + 'deny_scope_roles',
+                    json={
+                        "scope": request.container.id,
+                        "user": user,
+                        "roles": roles
+                    },
+                    headers={
+                        'Authorization': request.headers.get('Authorization', '')
+                    },
+                    timeout=self.timeout) as resp:
+                if resp.status == 200:
+                    return await resp.json()
+
     async def retrieve_temp_data(self, request, token):
         request = get_current_request()
         with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
