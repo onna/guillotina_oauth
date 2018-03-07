@@ -447,7 +447,7 @@ class OAuthJWTValidator(object):
 
             token['id'] = validated_jwt['login']
 
-            cache_key = self.get_user_cache_key(validated_jwt['login'])
+            cache_key = self.get_user_cache_key(validated_jwt['token'])
             if cache_key in USER_CACHE:
                 return USER_CACHE[cache_key]
 

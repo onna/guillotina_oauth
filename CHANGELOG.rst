@@ -1,7 +1,8 @@
 1.0.32 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Use token for user cache key instead of login
+  [vangheem]
 
 
 1.0.31 (2018-02-20)
