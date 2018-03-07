@@ -1,4 +1,4 @@
-1.0.32 (unreleased)
+1.0.32 (2018-03-07)
 -------------------
 
 - Use token for user cache key instead of login
