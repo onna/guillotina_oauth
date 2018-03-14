@@ -1,4 +1,4 @@
-1.1.0 (unreleased)
+1.1.0 (2018-03-14)
 ------------------
 
 - Upgrade to work with Guillotina 2.4.x
