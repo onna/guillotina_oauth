@@ -1,7 +1,8 @@
-1.0.33 (unreleased)
--------------------
+1.1.0 (unreleased)
+------------------
 
-- Nothing changed yet.
+- Upgrade to work with Guillotina 2.4.x
+  [vangheem]
 
 
 1.0.32 (2018-03-07)
