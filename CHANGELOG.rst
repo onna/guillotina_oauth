@@ -1,7 +1,8 @@
 1.1.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add service_get_user endpoint support
+  [vangheem]
 
 
 1.1.0 (2018-03-14)

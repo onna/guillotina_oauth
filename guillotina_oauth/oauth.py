@@ -293,16 +293,20 @@ class OAuth(object):
                 if resp.status == 200:
                     return await resp.json()
 
-    async def get_user(self, username, scope):
+    async def get_user(self, username, scope, service=False):
         request = get_current_request()
         data = {
             'user': username,
             'service_token': await self.service_token,
             'scope': scope
         }
+        if service:
+            url = self.server + 'service_get_user'
+        else:
+            url = self.server + 'get_user'
         with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
             async with session.post(
-                    self.server + 'get_user',
+                    url,
                     data=json.dumps(data),
                     headers={
                         'Authorization': request.headers.get('Authorization', '')
