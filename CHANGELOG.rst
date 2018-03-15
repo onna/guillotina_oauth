@@ -1,7 +1,8 @@
 1.1.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Only use authorization header if provided to get_temp_token
+  [vangheem]
 
 
 1.1.2 (2018-03-15)

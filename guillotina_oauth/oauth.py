@@ -235,13 +235,14 @@ class OAuth(object):
         }
         if ttl:
             data['ttl'] = ttl
+        if not authorization:
+            authorization = request.headers.get('Authorization', '')
         with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
             async with session.post(
                     self.server + 'get_temp_token',
                     json=data,
                     headers={
-                        'Authorization': request.headers.get(
-                            'Authorization', '') or authorization
+                        'Authorization': authorization
                     },
                     timeout=self.timeout) as resp:
                 text = await resp.text()
