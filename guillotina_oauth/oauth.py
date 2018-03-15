@@ -223,7 +223,8 @@ class OAuth(object):
                 return None
         return None
 
-    async def get_temp_token(self, request, payload={}, ttl=None, clear=False):
+    async def get_temp_token(self, request, payload={}, ttl=None, clear=False,
+                             authorization=''):
         request = get_current_request()
         data = {
             'payload': payload,
@@ -239,7 +240,8 @@ class OAuth(object):
                     self.server + 'get_temp_token',
                     json=data,
                     headers={
-                        'Authorization': request.headers.get('Authorization', '')
+                        'Authorization': request.headers.get(
+                            'Authorization', '') or authorization
                     },
                     timeout=self.timeout) as resp:
                 text = await resp.text()
