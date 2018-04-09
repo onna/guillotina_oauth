@@ -1,4 +1,4 @@
-1.1.4 (unreleased)
+1.1.4 (2018-04-09)
 ------------------
 
 - Getting the user with the user bearer token to valide when its not cached
