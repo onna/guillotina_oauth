@@ -474,12 +474,12 @@ class OAuthJWTValidator(object):
             #    # as the user on oauth
 
             scope = getattr(self.request, '_container_id', 'root')
-            service_token = await oauth_utility.service_token
+            # service_token = await oauth_utility.service_token
             t1 = time.time()
             result = await oauth_utility.call_auth(
                 'get_user',
                 params={
-                    'service_token': service_token,
+                    # 'service_token': service_token,
                     # 'user_token': validated_jwt['token'],
                     'scope': scope,
                     'user': validated_jwt['login']

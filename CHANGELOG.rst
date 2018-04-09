@@ -1,7 +1,8 @@
 1.1.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Getting the user with the user bearer token to valide when its not cached
+  [ramon]
 
 
 1.1.3 (2018-03-15)
