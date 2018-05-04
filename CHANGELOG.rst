@@ -1,4 +1,4 @@
-1.1.6 (unreleased)
+1.1.6 (2018-05-04)
 ------------------
 
 - add add_scope method
