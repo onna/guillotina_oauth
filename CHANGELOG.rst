@@ -1,8 +1,8 @@
 1.1.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
+- Use `permissions` data
+  [vangheem]
 
 1.1.4 (2018-04-09)
 ------------------

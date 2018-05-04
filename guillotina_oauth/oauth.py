@@ -525,6 +525,8 @@ class OAuthGuillotinaUser(GuillotinaUser):
         self._groups = [key for key
                         in user_data['groups']]
         self.id = user_data[self._attr_id]
+        for permission in user_data.get('permissions') or []:
+            self._permissions[permission] = Allow
 
 
 @configure.service(context=IApplication, name='@oauthgetcode', method='POST',
