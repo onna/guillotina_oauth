@@ -223,13 +223,15 @@ class OAuth(object):
                 return None
         return None
 
-    async def get_temp_token(self, request, payload={}, ttl=None, clear=False,
+    async def get_temp_token(self, request, payload=None, ttl=None, clear=False,
                              authorization=''):
+        if payload is None:
+            payload = {}
         request = get_current_request()
         data = {
             'payload': payload,
             'service_token': await self.service_token,
-            'scope': request._container_id,
+            'scope': getattr(request, '_container_id', None),
             'client_id': self.client_id,
             'clear': payload.pop('clear', clear)
         }
@@ -296,6 +298,27 @@ class OAuth(object):
                 if resp.status == 200:
                     return await resp.json()
 
+    async def check_scope_id(self, scope, service=False):
+        request = get_current_request()
+        data = {
+            'id': scope
+        }
+        if service:
+            data['service_token'] = await self.service_token
+        url = self.server + 'check_scope_id'
+        with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
+            async with session.post(
+                    url,
+                    params=data,
+                    headers={
+                        'Authorization': request.headers.get('Authorization', '')
+                    },
+                    timeout=self.timeout) as resp:
+                try:
+                    return await resp.json()
+                except Exception:
+                    pass
+
     async def get_user(self, username, scope, service=False):
         request = get_current_request()
         data = {
@@ -307,6 +330,28 @@ class OAuth(object):
             url = self.server + 'service_get_user'
         else:
             url = self.server + 'get_user'
+        with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
+            async with session.post(
+                    url,
+                    data=json.dumps(data),
+                    headers={
+                        'Authorization': request.headers.get('Authorization', '')
+                    },
+                    timeout=self.timeout) as resp:
+                if resp.status == 200:
+                    return await resp.json()
+
+    async def add_scope(self, scope, admin_user, urls=None):
+        if urls is None:
+            urls = {}
+        request = get_current_request()
+        data = {
+            'admin_user': admin_user,
+            'service_token': await self.service_token,
+            'scope': scope,
+            'urls': urls
+        }
+        url = self.server + 'add_scope'
         with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
             async with session.post(
                     url,

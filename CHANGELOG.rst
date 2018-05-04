@@ -1,7 +1,14 @@
 1.1.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- add add_scope method
+  [vangheem]
+
+- add check_scope_id method
+  [vangheem]
+
+- get_temp_token works without a container
+  [vangheem]
 
 
 1.1.5 (2018-05-04)
