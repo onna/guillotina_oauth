@@ -1,4 +1,4 @@
-1.1.7 (unreleased)
+1.1.7 (2018-05-07)
 ------------------
 
 - get_account_metadata and set_account_metadata methods added
