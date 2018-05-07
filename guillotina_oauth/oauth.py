@@ -342,16 +342,39 @@ class OAuth(object):
                 if resp.status == 200:
                     return await resp.json()
 
-    async def set_account_metadata(self, scope, payload, service=False):
+    async def set_account_metadata(self, scope, payload, client_id, service=False):
         request = get_current_request()
         data = {
             'scope': scope,
-            'payload': payload
+            'payload': payload,
+            'client_id': client_id
         }
         if service:
             url = join(self.server, 'service_set_account_metadata')
         else:
             url = join(self.server, 'set_account_metadata')
+        with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
+            async with session.post(
+                    url,
+                    data=json.dumps(data),
+                    headers={
+                        'Authorization': request.headers.get('Authorization', '')
+                    },
+                    timeout=self.timeout) as resp:
+                if resp.status == 200:
+                    return await resp.json()
+
+    async def modify_limit(self, scope, name, value, service=False):
+        request = get_current_request()
+        data = {
+            'scope': scope,
+            'name': name,
+            'value': value
+        }
+        if service:
+            url = join(self.server, 'service_modify_scope_limit')
+        else:
+            url = join(self.server, 'modify_scope_limit')
         with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
             async with session.post(
                     url,

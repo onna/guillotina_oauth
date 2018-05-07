@@ -1,7 +1,7 @@
 1.1.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- add modify limit
 
 
 1.1.7 (2018-05-07)
