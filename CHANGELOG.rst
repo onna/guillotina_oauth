@@ -1,7 +1,8 @@
 1.1.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- get_account_metadata and set_account_metadata methods added
+  [vangheem]
 
 
 1.1.6 (2018-05-04)

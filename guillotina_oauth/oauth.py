@@ -14,6 +14,7 @@ from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
 from guillotina.utils import get_current_request
 from lru import LRU
+from os.path import join
 
 import aiohttp
 import asyncio
@@ -330,6 +331,47 @@ class OAuth(object):
             url = self.server + 'service_get_user'
         else:
             url = self.server + 'get_user'
+        with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
+            async with session.post(
+                    url,
+                    data=json.dumps(data),
+                    headers={
+                        'Authorization': request.headers.get('Authorization', '')
+                    },
+                    timeout=self.timeout) as resp:
+                if resp.status == 200:
+                    return await resp.json()
+
+    async def set_account_metadata(self, scope, payload, service=False):
+        request = get_current_request()
+        data = {
+            'scope': scope,
+            'payload': payload
+        }
+        if service:
+            url = join(self.server, 'service_set_account_metadata')
+        else:
+            url = join(self.server, 'set_account_metadata')
+        with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
+            async with session.post(
+                    url,
+                    data=json.dumps(data),
+                    headers={
+                        'Authorization': request.headers.get('Authorization', '')
+                    },
+                    timeout=self.timeout) as resp:
+                if resp.status == 200:
+                    return await resp.json()
+
+    async def get_account_metadata(self, scope, service=False):
+        request = get_current_request()
+        data = {
+            'scope': scope
+        }
+        if service:
+            url = join(self.server, 'get_metadata_by_service')
+        else:
+            url = join(self.server, 'get_metadata')
         with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
             async with session.post(
                     url,
