@@ -429,7 +429,9 @@ class OAuth(object):
                     return await resp.json()
 
     async def add_user(self, username, email, password, send_email=True,
-                       reset_password=False, roles=None):
+                       reset_password=False, roles=None, data=None):
+        if data is None:
+            data = {}
         request = get_current_request()
         data = {
             'user': username,
@@ -438,7 +440,8 @@ class OAuth(object):
             'service_token': await self.service_token,
             'send-email': send_email,
             'reset-password': reset_password,
-            'scope': getattr(request, '_container_id', None)
+            'scope': getattr(request, '_container_id', None),
+            'data': data
         }
         if roles:
             data['roles'] = roles

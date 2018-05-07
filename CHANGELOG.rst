@@ -1,3 +1,9 @@
+1.1.9 (unreleased)
+------------------
+
+- add data attribute to add_user
+  [vangheem]
+
 1.1.8 (2018-05-07)
 ------------------
 
