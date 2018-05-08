@@ -1,4 +1,4 @@
-1.1.9 (unreleased)
+1.1.9 (2018-05-08)
 ------------------
 
 - Add client_id params to some endpoints
