@@ -364,12 +364,13 @@ class OAuth(object):
                 if resp.status == 200:
                     return await resp.json()
 
-    async def modify_limit(self, scope, name, value, service=False):
+    async def modify_limit(self, scope, name, value, client_id='', service=False):
         request = get_current_request()
         data = {
             'scope': scope,
             'name': name,
-            'value': value
+            'value': value,
+            'client_id': client_id
         }
         if service:
             url = join(self.server, 'service_modify_scope_limit')
@@ -386,10 +387,11 @@ class OAuth(object):
                 if resp.status == 200:
                     return await resp.json()
 
-    async def get_account_metadata(self, scope, service=False):
+    async def get_account_metadata(self, scope, client_id='', service=False):
         request = get_current_request()
         data = {
-            'scope': scope
+            'scope': scope,
+            'client_id': client_id
         }
         if service:
             url = join(self.server, 'get_metadata_by_service')

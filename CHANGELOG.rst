@@ -1,7 +1,8 @@
 1.1.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add client_id params to some endpoints
+  [vangheem]
 
 
 1.1.8 (2018-05-07)
