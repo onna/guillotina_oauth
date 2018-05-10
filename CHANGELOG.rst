@@ -1,4 +1,4 @@
-1.1.11 (unreleased)
+1.1.11 (2018-05-10)
 -------------------
 
 - check_scope_id is a GET
