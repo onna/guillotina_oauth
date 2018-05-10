@@ -308,7 +308,7 @@ class OAuth(object):
             data['service_token'] = await self.service_token
         url = self.server + 'check_scope_id'
         with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
-            async with session.post(
+            async with session.get(
                     url,
                     params=data,
                     headers={
@@ -318,7 +318,8 @@ class OAuth(object):
                 try:
                     return await resp.json()
                 except Exception:
-                    pass
+                    logger.warning(
+                        'Error getting response for check_scope_id', exc_info=True)
 
     async def get_user(self, username, scope, service=False):
         request = get_current_request()

@@ -1,7 +1,7 @@
 1.1.11 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- check_scope_id is a GET
 
 
 1.1.10 (2018-05-08)
