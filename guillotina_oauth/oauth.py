@@ -251,6 +251,11 @@ class OAuth(object):
                 text = await resp.text()
                 if resp.status == 200:
                     return text
+                else:
+                    text = await resp.json()
+                    logger.warning(
+                        'Error getting temp token: '
+                        f'{resp.status}: {text}', exc_info=True)
 
     async def grant_scope_roles(self, request, user, roles=[]):
         request = get_current_request()
@@ -269,6 +274,11 @@ class OAuth(object):
                     timeout=self.timeout) as resp:
                 if resp.status == 200:
                     return await resp.json()
+                else:
+                    text = await resp.json()
+                    logger.warning(
+                        'Error granting scope roles: '
+                        f'{resp.status}: {text}', exc_info=True)
 
     async def deny_scope_roles(self, request, user, roles=[]):
         request = get_current_request()
@@ -286,6 +296,11 @@ class OAuth(object):
                     timeout=self.timeout) as resp:
                 if resp.status == 200:
                     return await resp.json()
+                else:
+                    text = await resp.json()
+                    logger.warning(
+                        'Error denying scope roles: '
+                        f'{resp.status}: {text}', exc_info=True)
 
     async def retrieve_temp_data(self, request, token):
         request = get_current_request()
@@ -298,6 +313,11 @@ class OAuth(object):
                     timeout=self.timeout) as resp:
                 if resp.status == 200:
                     return await resp.json()
+                else:
+                    text = await resp.json()
+                    logger.warning(
+                        'Error temp data: '
+                        f'{resp.status}: {text}', exc_info=True)
 
     async def check_scope_id(self, scope, service=False):
         request = get_current_request()
@@ -318,8 +338,10 @@ class OAuth(object):
                 try:
                     return await resp.json()
                 except Exception:
+                    text = await resp.json()
                     logger.warning(
-                        'Error getting response for check_scope_id', exc_info=True)
+                        'Error getting response for check_scope_id: '
+                        f'{resp.status}: {text}', exc_info=True)
 
     async def get_user(self, username, scope, service=False):
         request = get_current_request()
@@ -364,6 +386,11 @@ class OAuth(object):
                     timeout=self.timeout) as resp:
                 if resp.status == 200:
                     return await resp.json()
+                else:
+                    text = await resp.json()
+                    logger.warning(
+                        'Error setting account metadata: '
+                        f'{resp.status}: {text}', exc_info=True)
 
     async def modify_limit(self, scope, name, value, client_id='', service=False):
         request = get_current_request()
@@ -387,6 +414,11 @@ class OAuth(object):
                     timeout=self.timeout) as resp:
                 if resp.status == 200:
                     return await resp.json()
+                else:
+                    text = await resp.json()
+                    logger.warning(
+                        'Error modifying limit: '
+                        f'{resp.status}: {text}', exc_info=True)
 
     async def get_account_metadata(self, scope, client_id='', service=False):
         request = get_current_request()
@@ -408,6 +440,11 @@ class OAuth(object):
                     timeout=self.timeout) as resp:
                 if resp.status == 200:
                     return await resp.json()
+                else:
+                    text = await resp.json()
+                    logger.warning(
+                        'Error getting metadata: '
+                        f'{resp.status}: {text}', exc_info=True)
 
     async def add_scope(self, scope, admin_user, urls=None):
         if urls is None:
@@ -430,6 +467,11 @@ class OAuth(object):
                     timeout=self.timeout) as resp:
                 if resp.status == 200:
                     return await resp.json()
+                else:
+                    text = await resp.json()
+                    logger.warning(
+                        'Error adding scope: '
+                        f'{resp.status}: {text}', exc_info=True)
 
     async def add_user(self, username, email, password, send_email=True,
                        reset_password=False, roles=None, data=None):

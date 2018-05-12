@@ -1,7 +1,7 @@
 1.1.12 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Add more logging
 
 
 1.1.11 (2018-05-10)
