@@ -1,7 +1,8 @@
 1.1.13 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- better handling of add_scope
+  [vangheem]
 
 
 1.1.12 (2018-05-12)

@@ -466,12 +466,14 @@ class OAuth(object):
                     },
                     timeout=self.timeout) as resp:
                 if resp.status == 200:
-                    return await resp.json()
-                else:
-                    text = await resp.json()
-                    logger.warning(
-                        'Error adding scope: '
-                        f'{resp.status}: {text}', exc_info=True)
+                    try:
+                        return await resp.json()
+                    except Exception:
+                        pass
+                text = await resp.text()
+                logger.warning(
+                    'Error adding scope: '
+                    f'{resp.status}: {text}', exc_info=True)
 
     async def add_user(self, username, email, password, send_email=True,
                        reset_password=False, roles=None, data=None):
