@@ -1,4 +1,4 @@
-1.1.13 (unreleased)
+1.1.13 (2018-05-17)
 -------------------
 
 - better handling of add_scope
