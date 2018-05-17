@@ -252,7 +252,7 @@ class OAuth(object):
                 if resp.status == 200:
                     return text
                 else:
-                    text = await resp.json()
+                    text = await resp.text()
                     logger.warning(
                         'Error getting temp token: '
                         f'{resp.status}: {text}', exc_info=True)
@@ -275,7 +275,7 @@ class OAuth(object):
                 if resp.status == 200:
                     return await resp.json()
                 else:
-                    text = await resp.json()
+                    text = await resp.text()
                     logger.warning(
                         'Error granting scope roles: '
                         f'{resp.status}: {text}', exc_info=True)
@@ -297,7 +297,7 @@ class OAuth(object):
                 if resp.status == 200:
                     return await resp.json()
                 else:
-                    text = await resp.json()
+                    text = await resp.text()
                     logger.warning(
                         'Error denying scope roles: '
                         f'{resp.status}: {text}', exc_info=True)
@@ -314,7 +314,7 @@ class OAuth(object):
                 if resp.status == 200:
                     return await resp.json()
                 else:
-                    text = await resp.json()
+                    text = await resp.text()
                     logger.warning(
                         'Error temp data: '
                         f'{resp.status}: {text}', exc_info=True)
@@ -338,7 +338,7 @@ class OAuth(object):
                 try:
                     return await resp.json()
                 except Exception:
-                    text = await resp.json()
+                    text = await resp.text()
                     logger.warning(
                         'Error getting response for check_scope_id: '
                         f'{resp.status}: {text}', exc_info=True)
@@ -387,7 +387,7 @@ class OAuth(object):
                 if resp.status == 200:
                     return await resp.json()
                 else:
-                    text = await resp.json()
+                    text = await resp.text()
                     logger.warning(
                         'Error setting account metadata: '
                         f'{resp.status}: {text}', exc_info=True)
@@ -415,7 +415,7 @@ class OAuth(object):
                 if resp.status == 200:
                     return await resp.json()
                 else:
-                    text = await resp.json()
+                    text = await resp.text()
                     logger.warning(
                         'Error modifying limit: '
                         f'{resp.status}: {text}', exc_info=True)
@@ -441,7 +441,7 @@ class OAuth(object):
                 if resp.status == 200:
                     return await resp.json()
                 else:
-                    text = await resp.json()
+                    text = await resp.text()
                     logger.warning(
                         'Error getting metadata: '
                         f'{resp.status}: {text}', exc_info=True)

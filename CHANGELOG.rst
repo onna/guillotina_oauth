@@ -1,7 +1,7 @@
 1.1.14 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- json handling fixes
 
 
 1.1.13 (2018-05-17)
