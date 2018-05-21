@@ -373,6 +373,7 @@ class OAuth(object):
             'client_id': client_id
         }
         if service:
+            data['service_token'] = await self.service_token
             url = join(self.server, 'service_set_account_metadata')
         else:
             url = join(self.server, 'set_account_metadata')
@@ -401,6 +402,7 @@ class OAuth(object):
             'client_id': client_id
         }
         if service:
+            data['service_token'] = await self.service_token
             url = join(self.server, 'service_modify_scope_limit')
         else:
             url = join(self.server, 'modify_scope_limit')
@@ -427,6 +429,7 @@ class OAuth(object):
             'client_id': client_id
         }
         if service:
+            data['service_token'] = await self.service_token
             url = join(self.server, 'get_metadata_by_service')
         else:
             url = join(self.server, 'get_metadata')

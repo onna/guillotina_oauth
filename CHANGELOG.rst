@@ -1,7 +1,8 @@
 1.1.15 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Make sure to use service token for endpoints that ask for it
+  [vangheem]
 
 
 1.1.14 (2018-05-17)
