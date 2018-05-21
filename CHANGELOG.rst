@@ -1,4 +1,4 @@
-1.1.15 (unreleased)
+1.1.15 (2018-05-21)
 -------------------
 
 - Make sure to use service token for endpoints that ask for it
