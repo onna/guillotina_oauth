@@ -1,4 +1,4 @@
-1.1.16 (unreleased)
+1.1.16 (2018-06-05)
 -------------------
 
 - Release to constrain version of guillotina
