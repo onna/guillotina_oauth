@@ -1,7 +1,8 @@
 1.1.16 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Release to constrain version of guillotina
+  [vangheem]
 
 
 1.1.15 (2018-05-21)

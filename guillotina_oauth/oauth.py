@@ -610,10 +610,10 @@ class OAuthJWTValidator(object):
                     app_settings['jwt']['secret'],
                     algorithms=[app_settings['jwt']['algorithm']])
             except jwt.exceptions.ExpiredSignatureError:
-                logger.warn("Token Expired")
+                logger.warning("Token Expired")
                 raise HTTPUnauthorized()
             except jwt.InvalidIssuedAtError:
-                logger.warn("Back to the future")
+                logger.warning("Back to the future")
                 validated_jwt = jwt.decode(
                     token['token'],
                     app_settings['jwt']['secret'],
@@ -651,6 +651,7 @@ class OAuthJWTValidator(object):
                     'Authorization': 'Bearer ' + token['token']
                 }
             )
+
             tdif = t1 - time.time()
             logger.info('Time OAUTH %f' % tdif)
             if result:

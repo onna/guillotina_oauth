@@ -25,7 +25,7 @@ setup(
     packages=find_packages(exclude=['ez_setup']),
     install_requires=[
         'setuptools',
-        'guillotina',
+        'guillotina>=3.0.0,<4.0.0',
         'ujson',
         'pyjwt',
         'lru-dict'
