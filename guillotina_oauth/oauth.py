@@ -6,7 +6,7 @@ from guillotina import app_settings
 from guillotina import configure
 from guillotina.api.content import DefaultOPTIONS
 from guillotina.auth.users import GuillotinaUser
-from guillotina.browser import Response
+from guillotina.response import Response
 from guillotina.component import getUtility
 from guillotina.exceptions import Unauthorized
 from guillotina.interfaces import Allow
@@ -738,4 +738,4 @@ class OptionsGetCredentials(DefaultOPTIONS):
             ', '.join(app_settings['cors']['allow_headers'])
 
         resp = await oauth_get_code(self.context, self.request)
-        return Response(response=resp, headers=headers, status=200)
+        return Response(content=resp, headers=headers, status=200)
