@@ -672,6 +672,30 @@ class OAuthJWTValidator(object):
 
         return None
 
+    async def check_scope_id(self, scope, service=False):
+        request = get_current_request()
+        data = {
+            'id': scope
+        }
+        if service:
+            data['service_token'] = await self.service_token
+        url = self.server + 'check_scope_id'
+        with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
+            async with session.get(
+                    url,
+                    params=data,
+                    headers={
+                        'Authorization': request.headers.get('Authorization', '')
+                    },
+                    timeout=self.timeout) as resp:
+                try:
+                    return await resp.json()
+                except Exception:
+                    text = await resp.text()
+                    logger.warning(
+                        'Error getting response for check_scope_id: '
+                        f'{resp.status}: {text}', exc_info=True)
+
 
 class OAuthGuillotinaUser(GuillotinaUser):
 

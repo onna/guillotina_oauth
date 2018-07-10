@@ -1,7 +1,7 @@
 1.1.17 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- add check_scope_id
 
 
 1.1.16 (2018-06-05)
