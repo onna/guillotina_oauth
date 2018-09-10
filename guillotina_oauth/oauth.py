@@ -240,7 +240,7 @@ class OAuth(object):
             data['ttl'] = ttl
         if not authorization:
             authorization = request.headers.get('Authorization', '')
-        with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
+        async with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
             async with session.post(
                     self.server + 'get_temp_token',
                     json=data,
@@ -259,7 +259,7 @@ class OAuth(object):
 
     async def grant_scope_roles(self, request, user, roles=[]):
         request = get_current_request()
-        with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
+        async with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
             async with session.post(
                     self.server + 'grant_scope_roles',
                     json={
@@ -282,7 +282,7 @@ class OAuth(object):
 
     async def deny_scope_roles(self, request, user, roles=[]):
         request = get_current_request()
-        with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
+        async with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
             async with session.post(
                     self.server + 'deny_scope_roles',
                     json={
@@ -304,7 +304,7 @@ class OAuth(object):
 
     async def retrieve_temp_data(self, request, token):
         request = get_current_request()
-        with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
+        async with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
             async with session.get(
                     self.server + 'retrieve_temp_data?token=' + token,
                     headers={
@@ -327,7 +327,7 @@ class OAuth(object):
         if service:
             data['service_token'] = await self.service_token
         url = self.server + 'check_scope_id'
-        with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
+        async with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
             async with session.get(
                     url,
                     params=data,
@@ -354,7 +354,7 @@ class OAuth(object):
             url = self.server + 'service_get_user'
         else:
             url = self.server + 'get_user'
-        with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
+        async with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
             async with session.post(
                     url,
                     data=json.dumps(data),
@@ -377,7 +377,7 @@ class OAuth(object):
             url = join(self.server, 'service_set_account_metadata')
         else:
             url = join(self.server, 'set_account_metadata')
-        with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
+        async with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
             async with session.post(
                     url,
                     data=json.dumps(data),
@@ -406,7 +406,7 @@ class OAuth(object):
             url = join(self.server, 'service_modify_scope_limit')
         else:
             url = join(self.server, 'modify_scope_limit')
-        with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
+        async with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
             async with session.post(
                     url,
                     data=json.dumps(data),
@@ -433,7 +433,7 @@ class OAuth(object):
             url = join(self.server, 'get_metadata_by_service')
         else:
             url = join(self.server, 'get_metadata')
-        with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
+        async with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
             async with session.post(
                     url,
                     data=json.dumps(data),
@@ -460,7 +460,7 @@ class OAuth(object):
             'urls': urls
         }
         url = self.server + 'add_scope'
-        with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
+        async with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
             async with session.post(
                     url,
                     data=json.dumps(data),
@@ -498,7 +498,7 @@ class OAuth(object):
         headers = {
             'Authorization': request.headers.get('Authorization', '')
         }
-        with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
+        async with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
             async with session.post(
                     self.server + 'add_user',
                     data=json.dumps(data),
@@ -514,7 +514,7 @@ class OAuth(object):
         method, needs_decode = REST_API[url]
 
         result = None
-        with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
+        async with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
             if method == 'GET':
                 logger.debug('GET ' + self.server + url)
                 async with session.get(
