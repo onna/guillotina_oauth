@@ -566,14 +566,14 @@ class OAuth(object):
                     # try to get new one and retry this...
                     await self.refresh_service_token()
                     await resp.release()
-                    session.close()
+                    await session.close()
                     return await self.call_auth(url, params, headers=headers,
                                                 future=future, retry=True, **kw)
                 else:
                     logger.error(
                         f'OAUTH SERVER ERROR({url}) {resp.status} {text}')
             await resp.release()
-            session.close()
+            await session.close()
         if future is not None:
             future.set_result(result)
         else:
