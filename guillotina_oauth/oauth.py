@@ -703,16 +703,16 @@ class OAuthGuillotinaUser(GuillotinaUser):
                    permission='guillotina.GetOAuthGrant', allow_access=True)
 async def oauth_get_code(context, request):
     oauth_utility = getUtility(IOAuth)
-    if 'client_id' in request.GET:
-        client_id = request.GET['client_id']
+    if 'client_id' in request.query:
+        client_id = request.query['client_id']
     else:
         client_id = oauth_utility.client_id
 
     scopes = []
     if hasattr(request, '_container_id'):
         scopes.append(request._container_id)
-    elif 'scope' in request.GET:
-        scopes.append(request.GET['scope'])
+    elif 'scope' in request.query:
+        scopes.append(request.query['scope'])
 
     result = await oauth_utility.auth_code(scopes, client_id)
     return {
