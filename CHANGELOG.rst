@@ -1,4 +1,4 @@
-2.0.1 (2018-10-3)
+2.0.2 (2018-10-3)
 -----------------
 
 - Replacing old request.GET for request.query [lferran]
