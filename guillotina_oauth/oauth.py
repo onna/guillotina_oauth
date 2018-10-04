@@ -479,13 +479,17 @@ class OAuth(object):
                     f'{resp.status}: {text}', exc_info=True)
 
     async def add_user(self, username, email, password, send_email=True,
-                       reset_password=False, roles=None, data=None):
+                       reset_password=False, roles=None, data=None, cn=None,
+                       sn=None):
+
         if data is None:
             data = {}
         request = get_current_request()
         data = {
             'user': username,
             'email': email,
+            'cn': cn,
+            'sn': sn,
             'password': password,
             'service_token': await self.service_token,
             'send-email': send_email,

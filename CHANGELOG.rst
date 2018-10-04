@@ -1,8 +1,7 @@
-1.1.18 (unreleased)
+1.1.18 (2018-10-04)
 -------------------
 
-- Nothing changed yet.
-
+- Support first/last name (Ismael)
 
 1.1.17 (2018-07-10)
 -------------------
