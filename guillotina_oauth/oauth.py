@@ -5,6 +5,7 @@ from datetime import datetime
 from guillotina import app_settings
 from guillotina import configure
 from guillotina.api.content import DefaultOPTIONS
+from guillotina.async_util import IAsyncUtility
 from guillotina.auth.users import GuillotinaUser
 from guillotina.response import Response
 from guillotina.component import getUtility
@@ -23,12 +24,6 @@ import jwt
 import logging
 import math
 import time
-
-
-try:
-    from guillotina.async_util import IAsyncUtility
-except ImportError:
-    from guillotina.async import IAsyncUtility
 
 
 logger = logging.getLogger('guillotina_oauth')
