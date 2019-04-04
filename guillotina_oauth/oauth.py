@@ -563,18 +563,23 @@ class OAuth(object):
                             result = await resp.json()
             if resp.status != 200:
                 # handle the error...
-                text = await resp.text()
-                if resp.status == 484 and not retry:  # bad service token status code
-                    logger.error('Invalid service token, refreshing')
-                    # try to get new one and retry this...
-                    await self.refresh_service_token()
-                    await resp.release()
-                    await session.close()
-                    return await self.call_auth(url, params, headers=headers,
-                                                future=future, retry=True, **kw)
-                else:
-                    logger.error(
-                        f'OAUTH SERVER ERROR({url}) {resp.status} {text}')
+
+                try:
+                    text = await resp.text()
+                    if resp.status == 484 and not retry:  # bad service token status code
+                        logger.error('Invalid service token, refreshing')
+                        # try to get new one and retry this...
+                        await self.refresh_service_token()
+                        await resp.release()
+                        await session.close()
+                        return await self.call_auth(url, params, headers=headers,
+                                                    future=future, retry=True, **kw)
+                    else:
+                        logger.error(
+                            f'OAUTH SERVER ERROR({url}) {resp.status} {text}')
+                except Exception:
+                    logger.error(f'OAUTH SERVER ERROR({url}) {resp.status}')
+
             await resp.release()
             await session.close()
         if future is not None:
