@@ -1,3 +1,8 @@
+2.0.5 (2019-4-20)
+-----------------
+
+- Send client_id along when adding a user [lferran]
+
 2.0.4 (2019-4-4)
 -----------------
 
