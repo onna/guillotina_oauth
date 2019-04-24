@@ -491,6 +491,7 @@ class OAuth(object):
             'sn': sn,
             'password': password,
             'service_token': await self.service_token,
+            'client_id': self.client_id,
             'send-email': send_email,
             'reset-password': reset_password,
             'scope': getattr(request, '_container_id', None),
