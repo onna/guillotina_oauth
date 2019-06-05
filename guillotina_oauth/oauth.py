@@ -5,13 +5,14 @@ from datetime import datetime
 from guillotina import app_settings
 from guillotina import configure
 from guillotina.api.content import DefaultOPTIONS
+from guillotina.async_util import IAsyncUtility
 from guillotina.auth.users import GuillotinaUser
-from guillotina.response import Response
 from guillotina.component import getUtility
 from guillotina.exceptions import Unauthorized
 from guillotina.interfaces import Allow
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
+from guillotina.response import Response
 from guillotina.utils import get_current_request
 from lru import LRU
 from os.path import join
@@ -23,12 +24,6 @@ import jwt
 import logging
 import math
 import time
-
-
-try:
-    from guillotina.async_util import IAsyncUtility
-except ImportError:
-    from guillotina.async import IAsyncUtility
 
 
 logger = logging.getLogger('guillotina_oauth')
@@ -67,6 +62,14 @@ class OAuth(object):
         self.loop = loop
         self._service_token = None
         self._settings = app_settings.get('oauth_settings', {})
+        self._session = None
+
+    @property
+    def session(self):
+        if self._session is None:
+            self._session = aiohttp.ClientSession(
+                conn_timeout=self.conn_timeout)
+        return self._session
 
     @property
     def configured(self):
@@ -126,7 +129,7 @@ class OAuth(object):
                     ConnectionRefusedError):
                 logger.debug('Could not connect to oauth host, oauth will not work')
                 await asyncio.sleep(10)  # wait 10 seconds before trying again
-            except:
+            except Exception:
                 logger.warn('Error renewing service token', exc_info=True)
                 await asyncio.sleep(30)  # unknown error, try again in 30 seconds
 
@@ -240,84 +243,80 @@ class OAuth(object):
             data['ttl'] = ttl
         if not authorization:
             authorization = request.headers.get('Authorization', '')
-        async with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
-            async with session.post(
-                    self.server + 'get_temp_token',
-                    json=data,
-                    headers={
-                        'Authorization': authorization
-                    },
-                    timeout=self.timeout) as resp:
+        async with self.session.post(
+                self.server + 'get_temp_token',
+                json=data,
+                headers={
+                    'Authorization': authorization
+                },
+                timeout=self.timeout) as resp:
+            text = await resp.text()
+            if resp.status == 200:
+                return text
+            else:
                 text = await resp.text()
-                if resp.status == 200:
-                    return text
-                else:
-                    text = await resp.text()
-                    logger.warning(
-                        'Error getting temp token: '
-                        f'{resp.status}: {text}', exc_info=True)
+                logger.warning(
+                    'Error getting temp token: '
+                    f'{resp.status}: {text}', exc_info=True)
 
     async def grant_scope_roles(self, request, user, roles=[]):
         request = get_current_request()
-        async with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
-            async with session.post(
-                    self.server + 'grant_scope_roles',
-                    json={
-                        "scope": request.container.id,
-                        "user": user,
-                        "roles": roles,
-                        'service_token': await self.service_token,
-                    },
-                    headers={
-                        'Authorization': request.headers.get('Authorization', '')
-                    },
-                    timeout=self.timeout) as resp:
-                if resp.status == 200:
-                    return await resp.json()
-                else:
-                    text = await resp.text()
-                    logger.warning(
-                        'Error granting scope roles: '
-                        f'{resp.status}: {text}', exc_info=True)
+        async with self.session.post(
+                self.server + 'grant_scope_roles',
+                json={
+                    "scope": request.container.id,
+                    "user": user,
+                    "roles": roles,
+                    'service_token': await self.service_token,
+                },
+                headers={
+                    'Authorization': request.headers.get('Authorization', '')
+                },
+                timeout=self.timeout) as resp:
+            if resp.status == 200:
+                return await resp.json()
+            else:
+                text = await resp.text()
+                logger.warning(
+                    'Error granting scope roles: '
+                    f'{resp.status}: {text}', exc_info=True)
 
     async def deny_scope_roles(self, request, user, roles=[]):
         request = get_current_request()
-        async with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
-            async with session.post(
-                    self.server + 'deny_scope_roles',
-                    json={
-                        "scope": request.container.id,
-                        "user": user,
-                        "roles": roles
-                    },
-                    headers={
-                        'Authorization': request.headers.get('Authorization', '')
-                    },
-                    timeout=self.timeout) as resp:
-                if resp.status == 200:
-                    return await resp.json()
-                else:
-                    text = await resp.text()
-                    logger.warning(
-                        'Error denying scope roles: '
-                        f'{resp.status}: {text}', exc_info=True)
+        async with self.session.post(
+                self.server + 'deny_scope_roles',
+                json={
+                    "scope": request.container.id,
+                    "user": user,
+                    "roles": roles
+                },
+                headers={
+                    'Authorization': request.headers.get('Authorization', '')
+                },
+                timeout=self.timeout) as resp:
+            if resp.status == 200:
+                return await resp.json()
+            else:
+                text = await resp.text()
+                logger.warning(
+                    'Error denying scope roles: '
+                    f'{resp.status}: {text}', exc_info=True)
 
     async def retrieve_temp_data(self, request, token):
         request = get_current_request()
-        async with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
-            async with session.get(
-                    self.server + 'retrieve_temp_data?token=' + token,
-                    headers={
-                        'Authorization': request.headers.get('Authorization', '')
-                    },
-                    timeout=self.timeout) as resp:
-                if resp.status == 200:
-                    return await resp.json()
-                else:
-                    text = await resp.text()
-                    logger.warning(
-                        'Error temp data: '
-                        f'{resp.status}: {text}', exc_info=True)
+        async with self.session.get(
+                self.server + 'retrieve_temp_data?token=' + token,
+                headers={
+                    'Authorization': request.headers.get('Authorization', '')
+                },
+                timeout=self.timeout) as resp:
+            if resp.status == 200:
+                return await resp.json()
+            else:
+                text = await resp.text()
+                logger.warning(
+                    'Error temp data: '
+                    f'{resp.status}: {text}', exc_info=True)
 
     async def check_scope_id(self, scope, service=False):
         request = get_current_request()
@@ -327,21 +326,20 @@ class OAuth(object):
         if service:
             data['service_token'] = await self.service_token
         url = self.server + 'check_scope_id'
-        async with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
-            async with session.get(
-                    url,
-                    params=data,
-                    headers={
-                        'Authorization': request.headers.get('Authorization', '')
-                    },
-                    timeout=self.timeout) as resp:
-                try:
-                    return await resp.json()
-                except Exception:
-                    text = await resp.text()
-                    logger.warning(
-                        'Error getting response for check_scope_id: '
-                        f'{resp.status}: {text}', exc_info=True)
+        async with self.session.get(
+                url,
+                params=data,
+                headers={
+                    'Authorization': request.headers.get('Authorization', '')
+                },
+                timeout=self.timeout) as resp:
+            try:
+                return await resp.json()
+            except Exception:
+                text = await resp.text()
+                logger.warning(
+                    'Error getting response for check_scope_id: '
+                    f'{resp.status}: {text}', exc_info=True)
 
     async def get_user(self, username, scope, service=False):
         request = get_current_request()
@@ -354,16 +352,15 @@ class OAuth(object):
             url = self.server + 'service_get_user'
         else:
             url = self.server + 'get_user'
-        async with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
-            async with session.post(
-                    url,
-                    data=json.dumps(data),
-                    headers={
-                        'Authorization': request.headers.get('Authorization', '')
-                    },
-                    timeout=self.timeout) as resp:
-                if resp.status == 200:
-                    return await resp.json()
+        async with self.session.post(
+                url,
+                data=json.dumps(data),
+                headers={
+                    'Authorization': request.headers.get('Authorization', '')
+                },
+                timeout=self.timeout) as resp:
+            if resp.status == 200:
+                return await resp.json()
 
     async def set_account_metadata(self, scope, payload, client_id, service=False):
         request = get_current_request()
@@ -377,21 +374,20 @@ class OAuth(object):
             url = join(self.server, 'service_set_account_metadata')
         else:
             url = join(self.server, 'set_account_metadata')
-        async with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
-            async with session.post(
-                    url,
-                    data=json.dumps(data),
-                    headers={
-                        'Authorization': request.headers.get('Authorization', '')
-                    },
-                    timeout=self.timeout) as resp:
-                if resp.status == 200:
-                    return await resp.json()
-                else:
-                    text = await resp.text()
-                    logger.warning(
-                        'Error setting account metadata: '
-                        f'{resp.status}: {text}', exc_info=True)
+        async with self.session.post(
+                url,
+                data=json.dumps(data),
+                headers={
+                    'Authorization': request.headers.get('Authorization', '')
+                },
+                timeout=self.timeout) as resp:
+            if resp.status == 200:
+                return await resp.json()
+            else:
+                text = await resp.text()
+                logger.warning(
+                    'Error setting account metadata: '
+                    f'{resp.status}: {text}', exc_info=True)
 
     async def modify_limit(self, scope, name, value, client_id='', service=False):
         request = get_current_request()
@@ -406,21 +402,20 @@ class OAuth(object):
             url = join(self.server, 'service_modify_scope_limit')
         else:
             url = join(self.server, 'modify_scope_limit')
-        async with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
-            async with session.post(
-                    url,
-                    data=json.dumps(data),
-                    headers={
-                        'Authorization': request.headers.get('Authorization', '')
-                    },
-                    timeout=self.timeout) as resp:
-                if resp.status == 200:
-                    return await resp.json()
-                else:
-                    text = await resp.text()
-                    logger.warning(
-                        'Error modifying limit: '
-                        f'{resp.status}: {text}', exc_info=True)
+        async with self.session.post(
+                url,
+                data=json.dumps(data),
+                headers={
+                    'Authorization': request.headers.get('Authorization', '')
+                },
+                timeout=self.timeout) as resp:
+            if resp.status == 200:
+                return await resp.json()
+            else:
+                text = await resp.text()
+                logger.warning(
+                    'Error modifying limit: '
+                    f'{resp.status}: {text}', exc_info=True)
 
     async def get_account_metadata(self, scope, client_id='', service=False):
         request = get_current_request()
@@ -433,21 +428,20 @@ class OAuth(object):
             url = join(self.server, 'get_metadata_by_service')
         else:
             url = join(self.server, 'get_metadata')
-        async with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
-            async with session.post(
-                    url,
-                    data=json.dumps(data),
-                    headers={
-                        'Authorization': request.headers.get('Authorization', '')
-                    },
-                    timeout=self.timeout) as resp:
-                if resp.status == 200:
-                    return await resp.json()
-                else:
-                    text = await resp.text()
-                    logger.warning(
-                        'Error getting metadata: '
-                        f'{resp.status}: {text}', exc_info=True)
+        async with self.session.post(
+                url,
+                data=json.dumps(data),
+                headers={
+                    'Authorization': request.headers.get('Authorization', '')
+                },
+                timeout=self.timeout) as resp:
+            if resp.status == 200:
+                return await resp.json()
+            else:
+                text = await resp.text()
+                logger.warning(
+                    'Error getting metadata: '
+                    f'{resp.status}: {text}', exc_info=True)
 
     async def add_scope(self, scope, admin_user, urls=None):
         if urls is None:
@@ -460,23 +454,22 @@ class OAuth(object):
             'urls': urls
         }
         url = self.server + 'add_scope'
-        async with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
-            async with session.post(
-                    url,
-                    data=json.dumps(data),
-                    headers={
-                        'Authorization': request.headers.get('Authorization', '')
-                    },
-                    timeout=self.timeout) as resp:
-                if resp.status == 200:
-                    try:
-                        return await resp.json()
-                    except Exception:
-                        pass
-                text = await resp.text()
-                logger.warning(
-                    'Error adding scope: '
-                    f'{resp.status}: {text}', exc_info=True)
+        async with self.session.post(
+                url,
+                data=json.dumps(data),
+                headers={
+                    'Authorization': request.headers.get('Authorization', '')
+                },
+                timeout=self.timeout) as resp:
+            if resp.status == 200:
+                try:
+                    return await resp.json()
+                except Exception:
+                    pass
+            text = await resp.text()
+            logger.warning(
+                'Error adding scope: '
+                f'{resp.status}: {text}', exc_info=True)
 
     async def add_user(self, username, email, password, send_email=True,
                        reset_password=False, roles=None, data=None, cn=None,
@@ -502,31 +495,50 @@ class OAuth(object):
         headers = {
             'Authorization': request.headers.get('Authorization', '')
         }
-        async with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
-            async with session.post(
-                    self.server + 'add_user',
-                    data=json.dumps(data),
-                    timeout=self.timeout,
-                    headers=headers) as resp:
-                if resp.status == 200:
-                    return resp.status, await resp.json()
-                else:
-                    return resp.status, await resp.text()
+        async with self.session.post(
+                self.server + 'add_user',
+                data=json.dumps(data),
+                timeout=self.timeout,
+                headers=headers) as resp:
+            if resp.status == 200:
+                return resp.status, await resp.json()
+            else:
+                return resp.status, await resp.text()
 
     async def call_auth(self, url, params, headers={}, future=None,
                         retry=False, **kw):
         method, needs_decode = REST_API[url]
 
         result = None
-        async with aiohttp.ClientSession(conn_timeout=self.conn_timeout) as session:
-            if method == 'GET':
-                logger.debug('GET ' + self.server + url)
-                async with session.get(
-                        self.server + url,
-                        params=params,
-                        headers=headers,
-                        timeout=self.timeout) as resp:
-                    if resp.status == 200:
+        if method == 'GET':
+            logger.debug('GET ' + self.server + url)
+            async with self.session.get(
+                    self.server + url,
+                    params=params,
+                    headers=headers,
+                    timeout=self.timeout) as resp:
+                if resp.status == 200:
+                    try:
+                        result = jwt.decode(
+                            await resp.text(),
+                            app_settings['jwt']['secret'],
+                            algorithms=[app_settings['jwt']['algorithm']])
+                    except jwt.InvalidIssuedAtError:
+                        logger.error('Error on Time at OAuth Server')
+                        result = jwt.decode(
+                            await resp.text(),
+                            app_settings['jwt']['secret'],
+                            algorithms=[app_settings['jwt']['algorithm']],
+                            options=NON_IAT_VERIFY)
+        elif method == 'POST':
+            logger.debug('POST ' + self.server + url)
+            async with self.session.post(
+                    self.server + url,
+                    data=json.dumps(params),
+                    headers=headers,
+                    timeout=self.timeout) as resp:
+                if resp.status == 200:
+                    if needs_decode:
                         try:
                             result = jwt.decode(
                                 await resp.text(),
@@ -539,50 +551,25 @@ class OAuth(object):
                                 app_settings['jwt']['secret'],
                                 algorithms=[app_settings['jwt']['algorithm']],
                                 options=NON_IAT_VERIFY)
-            elif method == 'POST':
-                logger.debug('POST ' + self.server + url)
-                async with session.post(
-                        self.server + url,
-                        data=json.dumps(params),
-                        headers=headers,
-                        timeout=self.timeout) as resp:
-                    if resp.status == 200:
-                        if needs_decode:
-                            try:
-                                result = jwt.decode(
-                                    await resp.text(),
-                                    app_settings['jwt']['secret'],
-                                    algorithms=[app_settings['jwt']['algorithm']])
-                            except jwt.InvalidIssuedAtError:
-                                logger.error('Error on Time at OAuth Server')
-                                result = jwt.decode(
-                                    await resp.text(),
-                                    app_settings['jwt']['secret'],
-                                    algorithms=[app_settings['jwt']['algorithm']],
-                                    options=NON_IAT_VERIFY)
-                        else:
-                            result = await resp.json()
-            if resp.status != 200:
-                # handle the error...
-
-                try:
-                    text = await resp.text()
-                    if resp.status == 484 and not retry:  # bad service token status code
-                        logger.error('Invalid service token, refreshing')
-                        # try to get new one and retry this...
-                        await self.refresh_service_token()
-                        await resp.release()
-                        await session.close()
-                        return await self.call_auth(url, params, headers=headers,
-                                                    future=future, retry=True, **kw)
                     else:
-                        logger.error(
-                            f'OAUTH SERVER ERROR({url}) {resp.status} {text}')
-                except Exception:
-                    logger.error(f'OAUTH SERVER ERROR({url}) {resp.status}')
+                        result = await resp.json()
+        if resp.status != 200:
+            # handle the error...
 
-            await resp.release()
-            await session.close()
+            try:
+                text = await resp.text()
+                if resp.status == 484 and not retry:  # bad service token status code
+                    logger.error('Invalid service token, refreshing')
+                    # try to get new one and retry this...
+                    await self.refresh_service_token()
+                    return await self.call_auth(url, params, headers=headers,
+                                                future=future, retry=True, **kw)
+                else:
+                    logger.error(
+                        f'OAUTH SERVER ERROR({url}) {resp.status} {text}')
+            except Exception:
+                logger.error(f'OAUTH SERVER ERROR({url}) {resp.status}')
+
         if future is not None:
             future.set_result(result)
         else:
