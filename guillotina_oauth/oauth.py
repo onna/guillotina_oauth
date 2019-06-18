@@ -23,6 +23,7 @@ import json
 import jwt
 import logging
 import math
+import os
 import time
 
 
@@ -34,7 +35,11 @@ NON_IAT_VERIFY = {
 }
 
 # cache user authorization for 1 minute so we don't hit oauth so much
-USER_CACHE_DURATION = 60 * 1
+try:
+    USER_CACHE_DURATION = int(os.environ.get('USER_CACHE_DURATION', 60 * 2))
+except (ValueError, TypeError):
+    USER_CACHE_DURATION = 60 * 2
+
 USER_CACHE = LRU(1000)
 
 
@@ -583,10 +588,11 @@ class OAuthJWTValidator(object):
     def __init__(self, request):
         self.request = request
 
-    def get_user_cache_key(self, login):
-        return '{}-{}-{}'.format(
+    def get_user_cache_key(self, login, token):
+        return '{}::{}::{}::{}'.format(
             getattr(self.request, '_container_id', 'root'),
             login,
+            token,
             math.ceil(math.ceil(time.time()) / USER_CACHE_DURATION)
         )
 
@@ -618,7 +624,7 @@ class OAuthJWTValidator(object):
 
             token['id'] = validated_jwt['login']
 
-            cache_key = self.get_user_cache_key(validated_jwt['token'])
+            cache_key = self.get_user_cache_key(validated_jwt['login'], validated_jwt['token'])
             if cache_key in USER_CACHE:
                 return USER_CACHE[cache_key]
 
