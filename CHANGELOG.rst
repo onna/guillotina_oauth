@@ -1,5 +1,5 @@
-2.0.7 (2019-6-18)
------------------
+2.0.7 (2019-06-18)
+------------------
 
 - Change user cache duration and change key format
 
