@@ -3,7 +3,7 @@ from aiohttp.web_exceptions import HTTPUnauthorized
 from calendar import timegm
 from datetime import datetime
 from guillotina import app_settings
-from guillotina import configure
+from guillotina import configure, task_vars
 from guillotina.api.content import DefaultOPTIONS
 from guillotina.async_util import IAsyncUtility
 from guillotina.auth.users import GuillotinaUser
@@ -581,16 +581,17 @@ class OAuth(object):
             return result
 
 
-class OAuthJWTValidator(object):
+class OAuthJWTValidator:
 
     for_validators = ('bearer', 'wstoken')
 
-    def __init__(self, request):
-        self.request = request
+    def __init__(self):
+        pass
 
     def get_user_cache_key(self, login, token):
+        container = task_vars.container.get()
         return '{}::{}::{}::{}'.format(
-            getattr(self.request, '_container_id', 'root'),
+            getattr(container, 'id', 'root'),
             login,
             token,
             math.ceil(math.ceil(time.time()) / USER_CACHE_DURATION)
@@ -638,7 +639,8 @@ class OAuthJWTValidator(object):
             #    # We validate that the actual token belongs to the same
             #    # as the user on oauth
 
-            scope = getattr(self.request, '_container_id', 'root')
+            container = task_vars.container.get()
+            scope = getattr(container, 'id', 'root')
             # service_token = await oauth_utility.service_token
             t1 = time.time()
             result = await oauth_utility.call_auth(
@@ -659,7 +661,7 @@ class OAuthJWTValidator(object):
             if result:
                 try:
                     user = OAuthGuillotinaUser(
-                        self.request, result, oauth_utility.attr_id)
+                        result, oauth_utility.attr_id)
                 except Unauthorized:
                     return None
 
@@ -677,8 +679,8 @@ class OAuthJWTValidator(object):
 
 class OAuthGuillotinaUser(GuillotinaUser):
 
-    def __init__(self, request, data, attr_id='mail'):
-        super(OAuthGuillotinaUser, self).__init__(request)
+    def __init__(self, data, attr_id='mail'):
+        super(OAuthGuillotinaUser, self).__init__()
         self._attr_id = attr_id
         self._init_data(data)
         self._properties = {}
