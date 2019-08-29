@@ -1,7 +1,7 @@
-2.0.8 (unreleased)
+5.0.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- g5 support
 
 
 2.0.7 (2019-06-18)

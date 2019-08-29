@@ -3,7 +3,7 @@ from aiohttp.web_exceptions import HTTPUnauthorized
 from calendar import timegm
 from datetime import datetime
 from guillotina import app_settings
-from guillotina import configure
+from guillotina import configure, task_vars
 from guillotina.api.content import DefaultOPTIONS
 from guillotina.async_util import IAsyncUtility
 from guillotina.auth.users import GuillotinaUser
@@ -176,7 +176,8 @@ class OAuth(object):
         return await self.refresh_service_token()
 
     async def get_users(self, request):
-        scope = request.container.id
+        container = task_vars.container.get()
+        scope = container.id
         header = {
             'Authorization': request.headers['Authorization']
         }
@@ -193,7 +194,8 @@ class OAuth(object):
     getUsers = get_users
 
     async def search_users(self, request, page=0, num_x_page=30, term='', search_attr='mail'):
-        scope = request.container.id
+        container = task_vars.container.get()
+        scope = container.id
         header = {
             'Authorization': request.headers['Authorization']
         }
@@ -216,7 +218,8 @@ class OAuth(object):
         return result
 
     async def validate_token(self, request, token):
-        scope = request.container.id
+        container = task_vars.container.get()
+        scope = container.id
         result = await self.call_auth(
             'valid_token',
             params={
@@ -236,11 +239,11 @@ class OAuth(object):
                              authorization=''):
         if payload is None:
             payload = {}
-        request = get_current_request()
+        container = task_vars.container.get()
         data = {
             'payload': payload,
             'service_token': await self.service_token,
-            'scope': getattr(request, '_container_id', None),
+            'scope': getattr(container, 'id', None),
             'client_id': self.client_id,
             'clear': payload.pop('clear', clear)
         }
@@ -265,11 +268,11 @@ class OAuth(object):
                     f'{resp.status}: {text}', exc_info=True)
 
     async def grant_scope_roles(self, request, user, roles=[]):
-        request = get_current_request()
+        container = task_vars.container.get()
         async with self.session.post(
                 self.server + 'grant_scope_roles',
                 json={
-                    "scope": request.container.id,
+                    "scope": container.id,
                     "user": user,
                     "roles": roles,
                     'service_token': await self.service_token,
@@ -287,11 +290,11 @@ class OAuth(object):
                     f'{resp.status}: {text}', exc_info=True)
 
     async def deny_scope_roles(self, request, user, roles=[]):
-        request = get_current_request()
+        container = task_vars.container.get()
         async with self.session.post(
                 self.server + 'deny_scope_roles',
                 json={
-                    "scope": request.container.id,
+                    "scope": container.id,
                     "user": user,
                     "roles": roles
                 },
@@ -308,7 +311,6 @@ class OAuth(object):
                     f'{resp.status}: {text}', exc_info=True)
 
     async def retrieve_temp_data(self, request, token):
-        request = get_current_request()
         async with self.session.get(
                 self.server + 'retrieve_temp_data?token=' + token,
                 headers={
@@ -482,6 +484,7 @@ class OAuth(object):
         if data is None:
             data = {}
         request = get_current_request()
+        container = task_vars.container.get()
         data = {
             'user': username,
             'email': email,
@@ -492,7 +495,7 @@ class OAuth(object):
             'client_id': self.client_id,
             'send-email': send_email,
             'reset-password': reset_password,
-            'scope': getattr(request, '_container_id', None),
+            'scope': getattr(container, 'id', None),
             'data': data
         }
         if roles:
@@ -581,16 +584,17 @@ class OAuth(object):
             return result
 
 
-class OAuthJWTValidator(object):
+class OAuthJWTValidator:
 
     for_validators = ('bearer', 'wstoken')
 
-    def __init__(self, request):
-        self.request = request
+    def __init__(self):
+        pass
 
     def get_user_cache_key(self, login, token):
+        container = task_vars.container.get()
         return '{}::{}::{}::{}'.format(
-            getattr(self.request, '_container_id', 'root'),
+            getattr(container, 'id', 'root'),
             login,
             token,
             math.ceil(math.ceil(time.time()) / USER_CACHE_DURATION)
@@ -638,7 +642,8 @@ class OAuthJWTValidator(object):
             #    # We validate that the actual token belongs to the same
             #    # as the user on oauth
 
-            scope = getattr(self.request, '_container_id', 'root')
+            container = task_vars.container.get()
+            scope = getattr(container, 'id', 'root')
             # service_token = await oauth_utility.service_token
             t1 = time.time()
             result = await oauth_utility.call_auth(
@@ -659,7 +664,7 @@ class OAuthJWTValidator(object):
             if result:
                 try:
                     user = OAuthGuillotinaUser(
-                        self.request, result, oauth_utility.attr_id)
+                        result, oauth_utility.attr_id)
                 except Unauthorized:
                     return None
 
@@ -677,8 +682,8 @@ class OAuthJWTValidator(object):
 
 class OAuthGuillotinaUser(GuillotinaUser):
 
-    def __init__(self, request, data, attr_id='mail'):
-        super(OAuthGuillotinaUser, self).__init__(request)
+    def __init__(self, data, attr_id='mail'):
+        super(OAuthGuillotinaUser, self).__init__()
         self._attr_id = attr_id
         self._init_data(data)
         self._properties = {}
