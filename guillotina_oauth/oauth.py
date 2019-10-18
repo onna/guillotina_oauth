@@ -193,18 +193,21 @@ class OAuth(object):
         return result
     getUsers = get_users
 
-    async def search_users(self, request, page=0, num_x_page=30, term='', search_attr='mail'):
+    async def search_users(self, request, page=0, num_x_page=30, term='', search_attr=['mail']):
         container = task_vars.container.get()
         scope = container.id
         header = {
             'Authorization': request.headers['Authorization']
         }
 
-        criteria = {search_attr: f"{term}*"}
+        criteria = {}
+        for attr in search_attr:
+            criteria[attr] = f"{term}*"
+
         payload = {
             'criteria': json.dumps(criteria),
             'exact_match': False,
-            'attrs': f'["{search_attr}"]',
+            'attrs': json.dumps(search_attr),
             'page': page,
             'num_x_page': num_x_page,
             'service_token': await self.service_token,

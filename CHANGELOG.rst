@@ -1,4 +1,8 @@
-5.0.0 (unreleased)
+5.0.1 (2019-10-18)
+------------------
+- Support searching on multiple attributes
+
+5.0.0 (2019-08-29)
 ------------------
 
 - g5 support
