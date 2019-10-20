@@ -202,7 +202,7 @@ class OAuth(object):
 
         criteria = {}
         for attr in search_attr:
-            criteria[attr] = f"{term}*"
+            criteria[attr] = f"{term}"
 
         payload = {
             'criteria': json.dumps(criteria),
