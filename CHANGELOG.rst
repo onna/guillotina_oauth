@@ -1,3 +1,9 @@
+5.0.2 (2019-10-31)
+------------------
+
+- specify to not get photo when authenticating user
+  [vangheem]
+
 5.0.1 (2019-10-18)
 ------------------
 - Support searching on multiple attributes

@@ -186,7 +186,8 @@ class OAuth(object):
             'get_users',
             params={
                 'service_token': await self.service_token,
-                'scope': scope
+                'scope': scope,
+                'photo_size': 'false'
             },
             headers=header
         )
@@ -356,7 +357,8 @@ class OAuth(object):
         data = {
             'user': username,
             'service_token': await self.service_token,
-            'scope': scope
+            'scope': scope,
+            'photo_size': 'false'
         }
         if service:
             url = self.server + 'service_get_user'
@@ -655,7 +657,8 @@ class OAuthJWTValidator:
                     # 'service_token': service_token,
                     # 'user_token': validated_jwt['token'],
                     'scope': scope,
-                    'user': validated_jwt['login']
+                    'user': validated_jwt['login'],
+                    'photo_size': 'false'
                 },
                 headers={
                     'Authorization': 'Bearer ' + token['token']
