@@ -592,7 +592,7 @@ class OAuth(object):
                                 "message": "Failed to call oauth server",
                                 "retries": retries,
                                 "status": resp.status,
-                                "text": text
+                                "text": text,
                             }
                         )
                 elif resp.status >= 500:
@@ -602,7 +602,7 @@ class OAuth(object):
                             "message": "Unhandled oauth server error",
                             "retries": retries,
                             "status": resp.status,
-                                "text": text
+                            "text": text,
                         }
                     )
             except Exception:
