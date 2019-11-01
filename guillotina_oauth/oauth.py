@@ -44,6 +44,8 @@ except (ValueError, TypeError):
 
 USER_CACHE = LRU(1000)
 
+RETRIABLE_CODES = (484, 503)
+
 
 class IOAuth(IAsyncUtility):
     """Marker interface for OAuth Utility."""
@@ -509,6 +511,7 @@ class OAuth(object):
 
         full_url = join(self.server.rstrip("/"), url.strip("/"))
         result = None
+        text = "unknown"
         if method == "GET":
             logger.debug("GET " + full_url)
             async with aiohttp_client.get(
@@ -529,6 +532,8 @@ class OAuth(object):
                             algorithms=[app_settings["jwt"]["algorithm"]],
                             options=NON_IAT_VERIFY,
                         )
+                else:
+                    text = await resp.text()
         elif method == "POST":
 
             logger.debug("POST " + full_url)
@@ -553,53 +558,63 @@ class OAuth(object):
                             )
                     else:
                         result = await resp.json()
-        if resp.status != 200:
-            # handle the error...
-            try:
-                text = await resp.text()
-            except Exception:
-                logger.error(
-                    f"UNHANDLED OAUTH SERVER ERROR({url}) {resp.status}", exc_info=True
-                )
-                text = "unknown"
-
-            try:
-                if resp.status in (484, 503) and retries < 3:
-                    logger.warning(
-                        f"OAUTH SERVER ERROR({url}) {resp.status} {text}, retrying"
-                    )
-                    if resp.status == 484:  # bad service token status code
-                        logger.warning("Invalid service token, refreshing")
-                        # try to get new one and retry this...
-                        await self.refresh_service_token()
-                    else:
-                        # provide brief pause before retrying
-                        await asyncio.sleep(0.05)
-                    return await self.call_auth(
-                        url,
-                        params,
-                        headers=headers,
-                        future=future,
-                        retries=retries + 1,
-                        **kw,
-                    )
                 else:
-                    logger.error(
-                        f"OAUTH SERVER ERROR({url}) {resp.status} {text}, retries exhausted"
+                    text = await resp.text()
+        if resp.status != 200:
+            try:
+                if resp.status in RETRIABLE_CODES:
+                    if retries < 3:
+                        logger.warning(
+                            f"OAUTH SERVER ERROR({url}) {resp.status} {text}, retrying"
+                        )
+                        if resp.status == 484:  # bad service token status code
+                            logger.warning("Invalid service token, refreshing")
+                            # try to get new one and retry this...
+                            await self.refresh_service_token()
+                        else:
+                            # provide brief pause before retrying
+                            await asyncio.sleep(0.05)
+                        return await self.call_auth(
+                            url,
+                            params,
+                            headers=headers,
+                            future=future,
+                            retries=retries + 1,
+                            **kw,
+                        )
+                    else:
+                        logger.error(
+                            f"OAUTH SERVER ERROR({url}) {resp.status} {text}, retries exhausted"
+                        )
+                        raise HTTPFailedDependency(
+                            content={
+                                "reason": "oauthServerFailure",
+                                "message": "Failed to call oauth server",
+                                "retries": retries,
+                                "status": resp.status,
+                                "text": text
+                            }
+                        )
+                elif resp.status >= 500:
+                    raise HTTPFailedDependency(
+                        content={
+                            "reason": "oauthServerFailure",
+                            "message": "Unhandled oauth server error",
+                            "retries": retries,
+                            "status": resp.status,
+                                "text": text
+                        }
                     )
-                    raise HTTPFailedDependency(content={
-                        'reason': 'oauthServerFailure',
-                        'message': "Failed to call oauth server",
-                        'retries': retries
-                    })
             except Exception:
                 logger.error(
                     f"UNHANDLED OAUTH SERVER ERROR({url}) {resp.status}", exc_info=True
                 )
-                raise HTTPFailedDependency(content={
-                    'reason': 'oauthServerFailure',
-                    'message': "Failed to call oauth server"
-                })
+                raise HTTPFailedDependency(
+                    content={
+                        "reason": "oauthServerFailure",
+                        "message": "Failed to call oauth server",
+                    }
+                )
 
         if future is not None:
             future.set_result(result)
