@@ -3,6 +3,11 @@
 
 - Fix anti-patterns [lferran]
 
+5.0.5 (2019-11-01)
+------------------
+
+- Be able to import types
+
 5.0.4 (2019-11-01)
 ------------------
 

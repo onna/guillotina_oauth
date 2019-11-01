@@ -20,6 +20,7 @@ setup(
     zip_safe=True,
     include_package_data=True,
     packages=find_packages(exclude=["ez_setup"]),
+    package_data={"": ["*.txt", "*.rst"], "guillotina_oauth": ["py.typed"]},
     install_requires=[
         "setuptools",
         "guillotina>=4.0.0",
