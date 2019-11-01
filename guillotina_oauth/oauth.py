@@ -3,7 +3,8 @@ from aiohttp.web_exceptions import HTTPUnauthorized
 from calendar import timegm
 from datetime import datetime
 from guillotina import app_settings
-from guillotina import configure, task_vars
+from guillotina import configure
+from guillotina import task_vars
 from guillotina.api.content import DefaultOPTIONS
 from guillotina.async_util import IAsyncUtility
 from guillotina.auth.users import GuillotinaUser
@@ -12,13 +13,14 @@ from guillotina.exceptions import Unauthorized
 from guillotina.interfaces import Allow
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
+from guillotina.response import HTTPFailedDependency
 from guillotina.response import Response
 from guillotina.utils import get_current_request
 from lru import LRU
 from os.path import join
 
-import aiohttp_client
 import aiohttp
+import aiohttp_client
 import asyncio
 import json
 import jwt
@@ -581,10 +583,19 @@ class OAuth(object):
                     logger.error(
                         f"OAUTH SERVER ERROR({url}) {resp.status} {text}, retries exhausted"
                     )
+                    raise HTTPFailedDependency(content={
+                        'reason': 'oauthServerFailure',
+                        'message': "Failed to call oauth server",
+                        'retries': retries
+                    })
             except Exception:
                 logger.error(
                     f"UNHANDLED OAUTH SERVER ERROR({url}) {resp.status}", exc_info=True
                 )
+                raise HTTPFailedDependency(content={
+                    'reason': 'oauthServerFailure',
+                    'message': "Failed to call oauth server"
+                })
 
         if future is not None:
             future.set_result(result)
