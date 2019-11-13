@@ -28,6 +28,7 @@ import logging
 import math
 import os
 import time
+import typing as t
 
 
 logger = logging.getLogger("guillotina_oauth")
@@ -267,7 +268,8 @@ class OAuth(object):
                     "Error getting temp token: " f"{resp.status}: {text}", exc_info=True
                 )
 
-    async def grant_scope_roles(self, request, user, roles=[]):
+    async def grant_scope_roles(self, request, user, roles: t.Optional[t.List[str]] = None):
+        roles = roles or []
         container = task_vars.container.get()
         async with aiohttp_client.post(
             join(self.server, "grant_scope_roles"),
@@ -289,7 +291,8 @@ class OAuth(object):
                     exc_info=True,
                 )
 
-    async def deny_scope_roles(self, request, user, roles=[]):
+    async def deny_scope_roles(self, request, user, roles: t.Optional[t.List[str]] = None):
+        roles = roles or []
         container = task_vars.container.get()
         async with aiohttp_client.post(
             join(self.server, "deny_scope_roles"),
@@ -500,7 +503,8 @@ class OAuth(object):
             else:
                 return resp.status, await resp.text()
 
-    async def call_auth(self, url, params, headers={}, future=None, retries=0, **kw):
+    async def call_auth(self, url: str, params: dict, headers: t.Optional[dict] = Nont, future=None, retries: int = 0, **kw):
+        headers = headers or {}
         method, needs_decode = REST_API[url]
 
         full_url = join(self.server.rstrip("/"), url.strip("/"))
