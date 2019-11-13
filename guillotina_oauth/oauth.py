@@ -503,7 +503,7 @@ class OAuth(object):
             else:
                 return resp.status, await resp.text()
 
-    async def call_auth(self, url: str, params: dict, headers: t.Optional[dict] = Nont, future=None, retries: int = 0, **kw):
+    async def call_auth(self, url: str, params: dict, headers: t.Optional[dict] = None, future=None, retries: int = 0, **kw):
         headers = headers or {}
         method, needs_decode = REST_API[url]
 
