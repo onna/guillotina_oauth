@@ -583,7 +583,7 @@ class OAuth(object):
                             **kw,
                         )
                     else:
-                        logger.error(
+                        logger.warning(
                             f"OAUTH SERVER ERROR({url}) {resp.status} {text}, retries exhausted"
                         )
                         raise HTTPFailedDependency(
@@ -605,6 +605,8 @@ class OAuth(object):
                             "text": text,
                         }
                     )
+            except HTTPFailedDependency:
+                raise
             except Exception:
                 logger.error(
                     f"UNHANDLED OAUTH SERVER ERROR({url}) {resp.status}", exc_info=True
