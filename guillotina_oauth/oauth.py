@@ -75,9 +75,7 @@ class OAuth(object):
     @property
     def configured(self):
         return (
-            "server" in self._settings
-            and "jwt_secret" in self._settings
-            and "client_id" in self._settings,
+            "server" in self._settings and "jwt_secret" in self._settings and "client_id" in self._settings,
             "client_password" in self._settings,
         )
 
@@ -123,17 +121,12 @@ class OAuth(object):
             try:
                 await self.refresh_service_token()
                 expiration = self._service_token["exp"]
-                time_to_sleep = (
-                    expiration - now - 60
-                )  # refresh before we run out of time...
+                time_to_sleep = expiration - now - 60  # refresh before we run out of time...
                 await asyncio.sleep(time_to_sleep)
             except asyncio.CancelledError:
                 # we're good, die
                 return
-            except (
-                aiohttp.client_exceptions.ClientConnectorError,
-                ConnectionRefusedError,
-            ):
+            except (aiohttp.client_exceptions.ClientConnectorError, ConnectionRefusedError):
                 logger.debug("Could not connect to oauth host, oauth will not work")
                 await asyncio.sleep(10)  # wait 10 seconds before trying again
             except Exception:
@@ -161,11 +154,7 @@ class OAuth(object):
         logger.debug("Getting new service token")
         result = await self.call_auth(
             "get_service_token",
-            {
-                "client_id": self.client_id,
-                "client_secret": self.client_password,
-                "grant_type": "service",
-            },
+            {"client_id": self.client_id, "client_secret": self.client_password, "grant_type": "service"},
         )
         if result:
             self._service_token = result
@@ -190,20 +179,14 @@ class OAuth(object):
 
         result = await self.call_auth(
             "get_users",
-            params={
-                "service_token": await self.service_token,
-                "scope": scope,
-                "photo_size": "false",
-            },
+            params={"service_token": await self.service_token, "scope": scope, "photo_size": "false"},
             headers=header,
         )
         return result
 
     getUsers = get_users
 
-    async def search_users(
-        self, request, page=0, num_x_page=30, term="", search_attr=["mail"]
-    ):
+    async def search_users(self, request, page=0, num_x_page=30, term="", search_attr=["mail"]):
         container = task_vars.container.get()
         scope = container.id
         header = {"Authorization": request.headers["Authorization"]}
@@ -228,8 +211,7 @@ class OAuth(object):
         container = task_vars.container.get()
         scope = container.id
         result = await self.call_auth(
-            "valid_token",
-            params={"code": await self.service_token, "token": token, "scope": scope},
+            "valid_token", params={"code": await self.service_token, "token": token, "scope": scope}
         )
         if result:
             if "user" in result:
@@ -238,9 +220,7 @@ class OAuth(object):
                 return None
         return None
 
-    async def get_temp_token(
-        self, request, payload=None, ttl=None, clear=False, authorization=""
-    ):
+    async def get_temp_token(self, request, payload=None, ttl=None, clear=False, authorization=""):
         if payload is None:
             payload = {}
         container = task_vars.container.get()
@@ -266,9 +246,7 @@ class OAuth(object):
                 return text
             else:
                 text = await resp.text()
-                logger.warning(
-                    "Error getting temp token: " f"{resp.status}: {text}", exc_info=True
-                )
+                logger.warning("Error getting temp token: " f"{resp.status}: {text}", exc_info=True)
 
     async def grant_scope_roles(self, request, user, roles: t.Optional[t.List[str]] = None):
         roles = roles or []
@@ -288,10 +266,7 @@ class OAuth(object):
                 return await resp.json()
             else:
                 text = await resp.text()
-                logger.warning(
-                    "Error granting scope roles: " f"{resp.status}: {text}",
-                    exc_info=True,
-                )
+                logger.warning("Error granting scope roles: " f"{resp.status}: {text}", exc_info=True)
 
     async def deny_scope_roles(self, request, user, roles: t.Optional[t.List[str]] = None):
         roles = roles or []
@@ -306,10 +281,7 @@ class OAuth(object):
                 return await resp.json()
             else:
                 text = await resp.text()
-                logger.warning(
-                    "Error denying scope roles: " f"{resp.status}: {text}",
-                    exc_info=True,
-                )
+                logger.warning("Error denying scope roles: " f"{resp.status}: {text}", exc_info=True)
 
     async def retrieve_temp_data(self, request, token):
         async with aiohttp_client.get(
@@ -321,9 +293,7 @@ class OAuth(object):
                 return await resp.json()
             else:
                 text = await resp.text()
-                logger.warning(
-                    "Error temp data: " f"{resp.status}: {text}", exc_info=True
-                )
+                logger.warning("Error temp data: " f"{resp.status}: {text}", exc_info=True)
 
     async def check_scope_id(self, scope, service=False):
         request = get_current_request()
@@ -342,9 +312,7 @@ class OAuth(object):
             except Exception:
                 text = await resp.text()
                 logger.warning(
-                    "Error getting response for check_scope_id: "
-                    f"{resp.status}: {text}",
-                    exc_info=True,
+                    "Error getting response for check_scope_id: " f"{resp.status}: {text}", exc_info=True
                 )
 
     async def get_user(self, username, scope, service=False):
@@ -386,10 +354,7 @@ class OAuth(object):
                 return await resp.json()
             else:
                 text = await resp.text()
-                logger.warning(
-                    "Error setting account metadata: " f"{resp.status}: {text}",
-                    exc_info=True,
-                )
+                logger.warning("Error setting account metadata: " f"{resp.status}: {text}", exc_info=True)
 
     async def modify_limit(self, scope, name, value, client_id="", service=False):
         request = get_current_request()
@@ -409,9 +374,7 @@ class OAuth(object):
                 return await resp.json()
             else:
                 text = await resp.text()
-                logger.warning(
-                    "Error modifying limit: " f"{resp.status}: {text}", exc_info=True
-                )
+                logger.warning("Error modifying limit: " f"{resp.status}: {text}", exc_info=True)
 
     async def get_account_metadata(self, scope, client_id="", service=False):
         request = get_current_request()
@@ -431,9 +394,7 @@ class OAuth(object):
                 return await resp.json()
             else:
                 text = await resp.text()
-                logger.warning(
-                    "Error getting metadata: " f"{resp.status}: {text}", exc_info=True
-                )
+                logger.warning("Error getting metadata: " f"{resp.status}: {text}", exc_info=True)
 
     async def add_scope(self, scope, admin_user, urls=None):
         if urls is None:
@@ -458,9 +419,7 @@ class OAuth(object):
                 except Exception:
                     pass
             text = await resp.text()
-            logger.warning(
-                "Error adding scope: " f"{resp.status}: {text}", exc_info=True
-            )
+            logger.warning("Error adding scope: " f"{resp.status}: {text}", exc_info=True)
 
     async def add_user(
         self,
@@ -495,17 +454,16 @@ class OAuth(object):
             data["roles"] = roles
         headers = {"Authorization": request.headers.get("Authorization", "")}
         async with aiohttp_client.post(
-            join(self.server, "add_user"),
-            data=json.dumps(data),
-            timeout=self.timeout,
-            headers=headers,
+            join(self.server, "add_user"), data=json.dumps(data), timeout=self.timeout, headers=headers
         ) as resp:
             if resp.status == 200:
                 return resp.status, await resp.json()
             else:
                 return resp.status, await resp.text()
 
-    async def call_auth(self, url: str, params: dict, headers: t.Optional[dict] = None, future=None, retries: int = 0, **kw):
+    async def call_auth(
+        self, url: str, params: dict, headers: t.Optional[dict] = None, future=None, retries: int = 0, **kw
+    ):
         headers = headers or {}
         method, needs_decode = REST_API[url]
 
@@ -564,9 +522,7 @@ class OAuth(object):
             try:
                 if resp.status in RETRIABLE_CODES:
                     if retries < 3:
-                        logger.warning(
-                            f"OAUTH SERVER ERROR({url}) {resp.status} {text}, retrying"
-                        )
+                        logger.warning(f"OAUTH SERVER ERROR({url}) {resp.status} {text}, retrying")
                         if resp.status == 484:  # bad service token status code
                             logger.warning("Invalid service token, refreshing")
                             # try to get new one and retry this...
@@ -575,17 +531,10 @@ class OAuth(object):
                             # provide brief pause before retrying
                             await asyncio.sleep(0.05)
                         return await self.call_auth(
-                            url,
-                            params,
-                            headers=headers,
-                            future=future,
-                            retries=retries + 1,
-                            **kw,
+                            url, params, headers=headers, future=future, retries=retries + 1, **kw
                         )
                     else:
-                        logger.warning(
-                            f"OAUTH SERVER ERROR({url}) {resp.status} {text}, retries exhausted"
-                        )
+                        logger.warning(f"OAUTH SERVER ERROR({url}) {resp.status} {text}, retries exhausted")
                         raise HTTPFailedDependency(
                             content={
                                 "reason": "oauthServerFailure",
@@ -608,14 +557,9 @@ class OAuth(object):
             except HTTPFailedDependency:
                 raise
             except Exception:
-                logger.error(
-                    f"UNHANDLED OAUTH SERVER ERROR({url}) {resp.status}", exc_info=True
-                )
+                logger.error(f"UNHANDLED OAUTH SERVER ERROR({url}) {resp.status}", exc_info=True)
                 raise HTTPFailedDependency(
-                    content={
-                        "reason": "oauthServerFailure",
-                        "message": "Failed to call oauth server",
-                    }
+                    content={"reason": "oauthServerFailure", "message": "Failed to call oauth server"}
                 )
 
         if future is not None:
@@ -670,9 +614,7 @@ class OAuthJWTValidator:
 
             token["id"] = validated_jwt["login"]
 
-            cache_key = self.get_user_cache_key(
-                validated_jwt["login"], validated_jwt["token"]
-            )
+            cache_key = self.get_user_cache_key(validated_jwt["login"], validated_jwt["token"])
             if cache_key in USER_CACHE:
                 return USER_CACHE[cache_key]
 
@@ -703,10 +645,9 @@ class OAuthJWTValidator:
                     headers={"Authorization": "Bearer " + token["token"]},
                 )
             except asyncio.TimeoutError:
-                raise HTTPFailedDependency(content={
-                    'reason': 'userApiTimeout',
-                    'message': 'Timeout authenticating with user api'
-                })
+                raise HTTPFailedDependency(
+                    content={"reason": "userApiTimeout", "message": "Timeout authenticating with user api"}
+                )
 
             tdif = t1 - time.time()
             logger.info("Time OAUTH %f" % tdif)
@@ -792,27 +733,18 @@ async def oauth_get_code(context, request):
 
 
 @configure.service(
-    context=IContainer,
-    name="@oauthgetcode",
-    method="OPTIONS",
-    permission="guillotina.GetOAuthGrant",
+    context=IContainer, name="@oauthgetcode", method="OPTIONS", permission="guillotina.GetOAuthGrant"
 )
 class OptionsGetCredentials(DefaultOPTIONS):
     async def __call__(self):
         headers = {}
         allowed_headers = ["Content-Type"] + app_settings["cors"]["allow_headers"]
         headers["Access-Control-Allow-Headers"] = ",".join(allowed_headers)
-        headers["Access-Control-Allow-Methods"] = ",".join(
-            app_settings["cors"]["allow_methods"]
-        )
+        headers["Access-Control-Allow-Methods"] = ",".join(app_settings["cors"]["allow_methods"])
         headers["Access-Control-Max-Age"] = str(app_settings["cors"]["max_age"])
-        headers["Access-Control-Allow-Origin"] = ",".join(
-            app_settings["cors"]["allow_origin"]
-        )
+        headers["Access-Control-Allow-Origin"] = ",".join(app_settings["cors"]["allow_origin"])
         headers["Access-Control-Allow-Credentials"] = "True"
-        headers["Access-Control-Expose-Headers"] = ", ".join(
-            app_settings["cors"]["allow_headers"]
-        )
+        headers["Access-Control-Expose-Headers"] = ", ".join(app_settings["cors"]["allow_headers"])
 
         resp = await oauth_get_code(self.context, self.request)
         return Response(content=resp, headers=headers, status=200)

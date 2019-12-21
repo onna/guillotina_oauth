@@ -2,13 +2,7 @@
 from guillotina import configure
 
 
-app_settings = {
-    "oauth_settings": {
-        "connect_timeout": 5,
-        "request_timeout": 30,
-        "auto_renew_token": True,
-    }
-}
+app_settings = {"oauth_settings": {"connect_timeout": 5, "request_timeout": 30, "auto_renew_token": True}}
 
 
 def includeme(root):
