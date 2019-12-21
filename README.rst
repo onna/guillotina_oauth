@@ -34,3 +34,14 @@ Generic global configuration on guillotina utilities section:
         "client_password": "secret"
     }
 }
+
+
+Getting started with development
+--------------------------------
+
+Using pip (requires Python > 3.7)
+
+.. code-block:: shell
+
+    ./bin/pip install -e .[test]
+    ./bin/pre-commit install
