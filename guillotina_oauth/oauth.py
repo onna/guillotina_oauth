@@ -690,17 +690,23 @@ class OAuthJWTValidator:
             scope = getattr(container, "id", "root")
             # service_token = await oauth_utility.service_token
             t1 = time.time()
-            result = await oauth_utility.call_auth(
-                "get_user",
-                params={
-                    # 'service_token': service_token,
-                    # 'user_token': validated_jwt['token'],
-                    "scope": scope,
-                    "user": validated_jwt["login"],
-                    "photo_size": "false",
-                },
-                headers={"Authorization": "Bearer " + token["token"]},
-            )
+            try:
+                result = await oauth_utility.call_auth(
+                    "get_user",
+                    params={
+                        # 'service_token': service_token,
+                        # 'user_token': validated_jwt['token'],
+                        "scope": scope,
+                        "user": validated_jwt["login"],
+                        "photo_size": "false",
+                    },
+                    headers={"Authorization": "Bearer " + token["token"]},
+                )
+            except asyncio.TimeoutError:
+                raise HTTPFailedDependency(content={
+                    'reason': 'userApiTimeout',
+                    'message': 'Timeout authenticating with user api'
+                })
 
             tdif = t1 - time.time()
             logger.info("Time OAUTH %f" % tdif)
