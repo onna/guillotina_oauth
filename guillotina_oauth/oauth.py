@@ -616,7 +616,7 @@ class OAuthJWTValidator:
                 token["id"] = validated_jwt["login"]
             except KeyError:
                 # somehow got valid jwt but it didn't have correct info. Ignore
-                return False
+                return None
 
             cache_key = self.get_user_cache_key(validated_jwt["login"], validated_jwt["token"])
             if cache_key in USER_CACHE:
