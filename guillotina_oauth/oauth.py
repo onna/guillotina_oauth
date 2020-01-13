@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from aiohttp.client_exceptions import ClientError
 from aiohttp.web_exceptions import HTTPUnauthorized
 from calendar import timegm
 from datetime import datetime
@@ -22,6 +23,7 @@ from os.path import join
 import aiohttp
 import aiohttp_client
 import asyncio
+import backoff
 import json
 import jwt
 import logging
@@ -461,6 +463,7 @@ class OAuth(object):
             else:
                 return resp.status, await resp.text()
 
+    @backoff.on_exception(backoff.expo, (OSError, ClientError), max_time=5, max_tries=4)
     async def call_auth(
         self, url: str, params: dict, headers: t.Optional[dict] = None, future=None, retries: int = 0, **kw
     ):
