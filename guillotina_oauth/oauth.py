@@ -1,7 +1,21 @@
 # -*- coding: utf-8 -*-
-from aiohttp.web_exceptions import HTTPUnauthorized
+import asyncio
+import json
+import logging
+import math
+import os
+import time
+import typing as t
 from calendar import timegm
 from datetime import datetime
+from os.path import join
+
+import jwt
+from lru import LRU
+
+import aiohttp
+import aiohttp_client
+from aiohttp.web_exceptions import HTTPUnauthorized
 from guillotina import app_settings
 from guillotina import configure
 from guillotina import task_vars
@@ -16,19 +30,6 @@ from guillotina.interfaces import IContainer
 from guillotina.response import HTTPFailedDependency
 from guillotina.response import Response
 from guillotina.utils import get_current_request
-from lru import LRU
-from os.path import join
-
-import aiohttp
-import aiohttp_client
-import asyncio
-import json
-import jwt
-import logging
-import math
-import os
-import time
-import typing as t
 
 
 logger = logging.getLogger("guillotina_oauth")
@@ -432,6 +433,7 @@ class OAuth(object):
         data=None,
         cn=None,
         sn=None,
+        template_id=None,
     ):
         if data is None:
             data = {}
@@ -449,6 +451,7 @@ class OAuth(object):
             "reset-password": reset_password,
             "scope": getattr(container, "id", None),
             "data": data,
+            "template_id": template_id,
         }
         if roles:
             data["roles"] = roles
