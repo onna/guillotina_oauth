@@ -1,7 +1,21 @@
 # -*- coding: utf-8 -*-
-from aiohttp.web_exceptions import HTTPUnauthorized
+import asyncio
+import json
+import logging
+import math
+import os
+import time
+import typing as t
 from calendar import timegm
 from datetime import datetime
+from os.path import join
+
+import jwt
+from lru import LRU
+
+import aiohttp
+import aiohttp_client
+from aiohttp.web_exceptions import HTTPUnauthorized
 from guillotina import app_settings
 from guillotina import configure
 from guillotina import task_vars
@@ -16,19 +30,6 @@ from guillotina.interfaces import IContainer
 from guillotina.response import HTTPFailedDependency
 from guillotina.response import Response
 from guillotina.utils import get_current_request
-from lru import LRU
-from os.path import join
-
-import aiohttp
-import aiohttp_client
-import asyncio
-import json
-import jwt
-import logging
-import math
-import os
-import time
-import typing as t
 
 
 logger = logging.getLogger("guillotina_oauth")
@@ -205,6 +206,14 @@ class OAuth(object):
             "scope": scope,
         }
         result = await self.call_auth("search_user", params=payload, headers=header)
+        return result
+
+    async def block_user(self, request, user):
+        container = task_vars.container.get()
+        scope = container.id
+        header = {"Authorization": request.headers["Authorization"]}
+        payload = {"service_token": await self.service_token, "scope": scope, "username": user, "user": user}
+        result = await self.call_auth("block_user", params=payload, headers=header)
         return result
 
     async def validate_token(self, request, token):
