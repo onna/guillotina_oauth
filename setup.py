@@ -24,10 +24,8 @@ setup(
     package_data={"": ["*.txt", "*.rst"], "guillotina_oauth": ["py.typed"]},
     install_requires=[
         "setuptools",
-        "guillotina>=4.0.0",
-        "ujson",
-        "pyjwt",
-        "lru-dict",
+        "guillotina @ git+https://github.com/plone/guillotina@migration-5-to-6-fixes#egg=guillotina",
+        # "guillotina>=4.0.0",
         "aiohttp-client-manager",
     ],
     extras_require={
