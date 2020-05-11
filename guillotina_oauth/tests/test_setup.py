@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+import pytest
 from guillotina.component import getUtility
 
 from guillotina_oauth.oauth import IOAuth
-import pytest
+
 
 pytestmark = pytest.mark.asyncio
 
