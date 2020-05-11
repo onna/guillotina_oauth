@@ -29,7 +29,7 @@ setup(
         "aiohttp-client-manager",
     ],
     extras_require={
-        "test": ["pytest", "pre-commit==1.18.2", "black==19.10b0", "isort==4.3.21", "pytest-docker-fixtures==1.3.7"],
+        "test": ["pytest", "pre-commit==1.18.2", "black==19.10b0", "isort==4.3.21", "pytest-docker-fixtures==1.3.7", "async-asgi-testclient" ],
     },
     entry_points={"guillotina": ["include = guillotina_oauth"]},
 )
