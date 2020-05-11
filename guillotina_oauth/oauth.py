@@ -1,7 +1,19 @@
 # -*- coding: utf-8 -*-
-from aiohttp.web_exceptions import HTTPUnauthorized
+import asyncio
+import json
+import logging
+import math
+import os
+import time
+import typing as t
 from calendar import timegm
 from datetime import datetime
+from os.path import join
+
+import aiohttp
+import aiohttp_client
+import jwt
+from aiohttp.web_exceptions import HTTPUnauthorized
 from guillotina import app_settings
 from guillotina import configure
 from guillotina import task_vars
@@ -17,18 +29,6 @@ from guillotina.response import HTTPFailedDependency
 from guillotina.response import Response
 from guillotina.utils import get_current_request
 from lru import LRU
-from os.path import join
-
-import aiohttp
-import aiohttp_client
-import asyncio
-import json
-import jwt
-import logging
-import math
-import os
-import time
-import typing as t
 
 
 logger = logging.getLogger("guillotina_oauth")
