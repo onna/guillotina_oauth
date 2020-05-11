@@ -1,0 +1,40 @@
+name: guillotina_oauth
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7, 3.8]
+
+    steps:
+      # Checkout the repository first
+      - uses: actions/checkout@v2
+
+      # Setup the python version
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # Linters and typing
+      - name: Pre-checks
+        run: |
+          # Install
+          pip install -e .[test]
+
+          pip install flake8 isort black
+
+          # Run commands
+          flake8 guillotina_oauth --config=setup.cfg
+          isort -c -rc guillotina_oauth
+          black --check --verbose guillotina_oauth
+
+      # Run tests
+      - name: Run tests
+        run: |
+          # Run tests
+          pytest -v guillotina_oauth
