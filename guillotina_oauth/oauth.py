@@ -718,8 +718,8 @@ class OAuthGuillotinaUser(GuillotinaUser):
     method="GET",
     permission="guillotina.GetOAuthGrant",
     allow_access=True,
-    summary="Grant access with OAuth",
-    description="Authenticate with [OAuth](https://oauth.net/)",
+    summary="Grant access with OAuth 2.0",
+    description="Authenticate with [OAuth 2.0](https://oauth.net/)",
 )
 async def oauth_get_code(context, request):
     oauth_utility = getUtility(IOAuth)
