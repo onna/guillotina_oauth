@@ -342,7 +342,6 @@ class OAuth(object):
         request = get_current_request()
         url = join(self.server, "edit_user")
 
-        breakpoint()
         payload = {"client_id": client_id, "service_token": await self.service_token, "info": {"data": data}}
 
         async with aiohttp_client.post(
