@@ -30,6 +30,6 @@ setup(
         "lru-dict",
         "aiohttp-client-manager",
     ],
-    tests_require=["pytest", "pre-commit==1.18.2", "black==19.10b0", "isort==4.3.21"],
+    tests_require=["pytest", "pre-commit==1.18.2", "black==19.10b0", "isort==4.3.21", "aioresponses"],
     entry_points={"guillotina": ["include = guillotina_oauth"]},
 )

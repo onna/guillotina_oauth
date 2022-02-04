@@ -338,6 +338,24 @@ class OAuth(object):
             if resp.status == 200:
                 return await resp.json()
 
+    async def set_user_metadata(self, client_id, data):
+        request = get_current_request()
+        url = join(self.server, "edit_user")
+
+        payload = {"client_id": client_id, "service_token": await self.service_token, "info": {"data": data}}
+
+        async with aiohttp_client.post(
+            url,
+            data=json.dumps(payload),
+            headers={"Authorization": request.headers.get("Authorization", "")},
+            timeout=self.timeout,
+        ) as resp:
+            if resp.status != 200:
+                text = await resp.text()
+                logger.warning("Error setting user metadata: " f"{resp.status}: {text}", exc_info=True)
+            
+            return resp.status
+
     async def set_account_metadata(self, scope, payload, client_id, service=False):
         request = get_current_request()
         data = {"scope": scope, "payload": payload, "client_id": client_id}
