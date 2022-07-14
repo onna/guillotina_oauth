@@ -1,8 +1,21 @@
 # -*- coding: utf-8 -*-
-from aiohttp.client_exceptions import ClientError
-from aiohttp.web_exceptions import HTTPUnauthorized
+import asyncio
+import json
+import logging
+import math
+import os
+import time
+import typing as t
 from calendar import timegm
 from datetime import datetime
+from os.path import join
+
+import aiohttp
+import aiohttp_client
+import backoff
+import jwt
+from aiohttp.client_exceptions import ClientError
+from aiohttp.web_exceptions import HTTPUnauthorized
 from guillotina import app_settings
 from guillotina import configure
 from guillotina import task_vars
@@ -18,19 +31,6 @@ from guillotina.response import HTTPFailedDependency
 from guillotina.response import Response
 from guillotina.utils import get_current_request
 from lru import LRU
-from os.path import join
-
-import aiohttp
-import aiohttp_client
-import asyncio
-import backoff
-import json
-import jwt
-import logging
-import math
-import os
-import time
-import typing as t
 
 
 logger = logging.getLogger("guillotina_oauth")
@@ -172,7 +172,7 @@ class OAuth(object):
             now = timegm(datetime.utcnow().utctimetuple())
             if (self._service_token["exp"] - 60) > now:
                 return self._service_token["service_token"]
-        return await self.refresh_service_token()
+        return self.refresh_service_token()
 
     async def get_users(self, request):
         container = task_vars.container.get()
@@ -341,7 +341,8 @@ class OAuth(object):
     async def set_user_metadata(self, client_id, data):
         request = get_current_request()
         url = join(self.server, "edit_user")
-
+        if "jpegPhoto" not in data:
+            data["jpegPhoto"] = ""
         payload = {"client_id": client_id, "service_token": await self.service_token, "info": {"data": data}}
 
         async with aiohttp_client.post(
@@ -353,7 +354,7 @@ class OAuth(object):
             if resp.status != 200:
                 text = await resp.text()
                 logger.warning("Error setting user metadata: " f"{resp.status}: {text}", exc_info=True)
-            
+
             return resp.status
 
     async def set_account_metadata(self, scope, payload, client_id, service=False):

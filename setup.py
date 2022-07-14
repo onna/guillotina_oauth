@@ -9,7 +9,7 @@ setup(
     version=open("VERSION").read().strip(),
     long_description=(open("README.rst").read() + "\n" + open("CHANGELOG.rst").read()),
     classifiers=[
-        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
     keywords="guillotina oauth",
@@ -30,6 +30,17 @@ setup(
         "lru-dict",
         "aiohttp-client-manager",
     ],
-    tests_require=["pytest", "pre-commit==1.18.2", "black==19.10b0", "isort==4.3.21", "aioresponses"],
+    extras_require={
+        "test": [
+            "pytest",
+            "pytest-docker-fixtures",
+            "async_asgi_testclient",
+            "pytest-asyncio",
+            "pre-commit==2.9.2",
+            "black==19.10b0",
+            "isort==4.3.21",
+            "aioresponses",
+        ]
+    },
     entry_points={"guillotina": ["include = guillotina_oauth"]},
 )
