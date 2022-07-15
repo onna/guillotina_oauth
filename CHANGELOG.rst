@@ -1,3 +1,8 @@
+5.1.1
+-----
+
+- [sc-75689] If jpegPhoto is not present when setting user metadata, add it empty
+
 5.1.0 (2022-02-04)
 ------------------
 

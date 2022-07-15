@@ -8,3 +8,6 @@ include/
 lib/
 pip-selfcheck.json
 .idea
+venv/
+pip-wheel-metadata/
+.python-version
