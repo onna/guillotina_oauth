@@ -152,7 +152,7 @@ class OAuth(object):
             return result["auth_code"]
         return None
 
-    async def refresh_service_token(self):
+    async def refresh_service_token(self) -> str:
         logger.debug("Getting new service token")
         result = await self.call_auth(
             "get_service_token",
@@ -167,12 +167,12 @@ class OAuth(object):
             logger.debug("No token returned from oauth")
 
     @property
-    async def service_token(self):
+    async def service_token(self) -> str:
         if self._service_token:
             now = timegm(datetime.utcnow().utctimetuple())
             if (self._service_token["exp"] - 60) > now:
                 return self._service_token["service_token"]
-        return self.refresh_service_token()
+        return await self.refresh_service_token()
 
     async def get_users(self, request):
         container = task_vars.container.get()

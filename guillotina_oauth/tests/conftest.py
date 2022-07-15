@@ -1,4 +1,8 @@
+from typing import Any
+
 from guillotina.testing import TESTING_SETTINGS
+from guillotina.tests.conftest import *  # noqa
+
 
 TESTING_SETTINGS["applications"] = ["guillotina_oauth"]
 TESTING_SETTINGS["oauth_settings"] = {
@@ -9,4 +13,6 @@ TESTING_SETTINGS["oauth_settings"] = {
     "client_password": "secret",
 }
 
-from guillotina.tests.conftest import *  # noqa
+
+async def async_val(val: Any) -> Any:
+    return val
