@@ -1,3 +1,8 @@
+5.1.2
+-----
+
+- [sc-75689] Revert changes made in 5.1.1 (not needed)
+
 5.1.1
 -----
 
