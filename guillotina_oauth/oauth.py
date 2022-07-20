@@ -341,8 +341,6 @@ class OAuth(object):
     async def set_user_metadata(self, client_id, data):
         request = get_current_request()
         url = join(self.server, "edit_user")
-        if "jpegPhoto" not in data:
-            data["jpegPhoto"] = ""
         payload = {"client_id": client_id, "service_token": await self.service_token, "info": {"data": data}}
 
         async with aiohttp_client.post(
