@@ -11,3 +11,5 @@ pip-selfcheck.json
 venv/
 pip-wheel-metadata/
 .python-version
+build/
+dist/

@@ -1,3 +1,8 @@
+5.1.3
+-----
+
+- Support newer versions of aiohttp
+
 5.1.2
 -----
 

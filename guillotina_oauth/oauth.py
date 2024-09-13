@@ -243,11 +243,11 @@ class OAuth(object):
             headers={"Authorization": authorization},
             timeout=self.timeout,
         ) as resp:
-            text = await resp.text()
+            text = await resp.text(encoding="utf-8")
             if resp.status == 200:
                 return text
             else:
-                text = await resp.text()
+                text = await resp.text(encoding="utf-8")
                 logger.warning("Error getting temp token: " f"{resp.status}: {text}", exc_info=True)
 
     async def grant_scope_roles(self, request, user, roles: t.Optional[t.List[str]] = None):
@@ -267,7 +267,7 @@ class OAuth(object):
             if resp.status == 200:
                 return await resp.json()
             else:
-                text = await resp.text()
+                text = await resp.text(encoding="utf-8")
                 logger.warning("Error granting scope roles: " f"{resp.status}: {text}", exc_info=True)
 
     async def deny_scope_roles(self, request, user, roles: t.Optional[t.List[str]] = None):
@@ -282,7 +282,7 @@ class OAuth(object):
             if resp.status == 200:
                 return await resp.json()
             else:
-                text = await resp.text()
+                text = await resp.text(encoding="utf-8")
                 logger.warning("Error denying scope roles: " f"{resp.status}: {text}", exc_info=True)
 
     async def retrieve_temp_data(self, request, token):
@@ -294,7 +294,7 @@ class OAuth(object):
             if resp.status == 200:
                 return await resp.json()
             else:
-                text = await resp.text()
+                text = await resp.text(encoding="utf-8")
                 logger.warning("Error temp data: " f"{resp.status}: {text}", exc_info=True)
 
     async def check_scope_id(self, scope, service=False):
@@ -312,7 +312,7 @@ class OAuth(object):
             try:
                 return await resp.json()
             except Exception:
-                text = await resp.text()
+                text = await resp.text(encoding="utf-8")
                 logger.warning(
                     "Error getting response for check_scope_id: " f"{resp.status}: {text}", exc_info=True
                 )
@@ -350,7 +350,7 @@ class OAuth(object):
             timeout=self.timeout,
         ) as resp:
             if resp.status != 200:
-                text = await resp.text()
+                text = await resp.text(encoding="utf-8")
                 logger.warning("Error setting user metadata: " f"{resp.status}: {text}", exc_info=True)
 
             return resp.status
@@ -372,7 +372,7 @@ class OAuth(object):
             if resp.status == 200:
                 return await resp.json()
             else:
-                text = await resp.text()
+                text = await resp.text(encoding="utf-8")
                 logger.warning("Error setting account metadata: " f"{resp.status}: {text}", exc_info=True)
 
     async def modify_limit(self, scope, name, value, client_id="", service=False):
@@ -392,7 +392,7 @@ class OAuth(object):
             if resp.status == 200:
                 return await resp.json()
             else:
-                text = await resp.text()
+                text = await resp.text(encoding="utf-8")
                 logger.warning("Error modifying limit: " f"{resp.status}: {text}", exc_info=True)
 
     async def get_account_metadata(self, scope, client_id="", service=False):
@@ -412,7 +412,7 @@ class OAuth(object):
             if resp.status == 200:
                 return await resp.json()
             else:
-                text = await resp.text()
+                text = await resp.text(encoding="utf-8")
                 logger.warning("Error getting metadata: " f"{resp.status}: {text}", exc_info=True)
 
     async def add_scope(self, scope, admin_user, urls=None):
@@ -437,7 +437,7 @@ class OAuth(object):
                     return await resp.json()
                 except Exception:
                     pass
-            text = await resp.text()
+            text = await resp.text(encoding="utf-8")
             logger.warning("Error adding scope: " f"{resp.status}: {text}", exc_info=True)
 
     async def add_user(
@@ -478,7 +478,7 @@ class OAuth(object):
             if resp.status == 200:
                 return resp.status, await resp.json()
             else:
-                return resp.status, await resp.text()
+                return resp.status, await resp.text(encoding="utf-8")
 
     @backoff.on_exception(backoff.expo, (OSError, ClientError), max_time=5, max_tries=4)
     async def call_auth(
@@ -498,22 +498,21 @@ class OAuth(object):
                 if resp.status == 200:
                     try:
                         result = jwt.decode(
-                            await resp.text(),
+                            await resp.text(encoding="utf-8"),
                             app_settings["jwt"]["secret"],
                             algorithms=[app_settings["jwt"]["algorithm"]],
                         )
                     except jwt.InvalidIssuedAtError:
                         logger.error("Error on Time at OAuth Server")
                         result = jwt.decode(
-                            await resp.text(),
+                            await resp.text(encoding="utf-8"),
                             app_settings["jwt"]["secret"],
                             algorithms=[app_settings["jwt"]["algorithm"]],
                             options=NON_IAT_VERIFY,
                         )
                 else:
-                    text = await resp.text()
+                    text = await resp.text(encoding="utf-8")
         elif method == "POST":
-
             logger.debug("POST " + full_url)
             async with aiohttp_client.post(
                 full_url, data=json.dumps(params), headers=headers, timeout=self.timeout
@@ -522,14 +521,14 @@ class OAuth(object):
                     if needs_decode:
                         try:
                             result = jwt.decode(
-                                await resp.text(),
+                                await resp.text(encoding="utf-8"),
                                 app_settings["jwt"]["secret"],
                                 algorithms=[app_settings["jwt"]["algorithm"]],
                             )
                         except jwt.InvalidIssuedAtError:
                             logger.error("Error on Time at OAuth Server")
                             result = jwt.decode(
-                                await resp.text(),
+                                await resp.text(encoding="utf-8"),
                                 app_settings["jwt"]["secret"],
                                 algorithms=[app_settings["jwt"]["algorithm"]],
                                 options=NON_IAT_VERIFY,
@@ -537,7 +536,7 @@ class OAuth(object):
                     else:
                         result = await resp.json()
                 else:
-                    text = await resp.text()
+                    text = await resp.text(encoding="utf-8")
         if resp.status != 200:
             try:
                 if resp.status in RETRIABLE_CODES:
@@ -589,7 +588,6 @@ class OAuth(object):
 
 
 class OAuthJWTValidator:
-
     for_validators = ("bearer", "wstoken")
 
     def __init__(self):
