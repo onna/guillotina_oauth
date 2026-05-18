@@ -397,23 +397,34 @@ class OAuth(object):
 
     async def get_account_metadata(self, scope, client_id="", service=False):
         request = get_current_request()
-        data = {"scope": scope, "client_id": client_id}
         if service:
-            data["service_token"] = await self.service_token
             url = join(self.server, "get_metadata_by_service")
         else:
             url = join(self.server, "get_metadata")
-        async with aiohttp_client.post(
-            url,
-            data=json.dumps(data),
-            headers={"Authorization": request.headers.get("Authorization", "")},
-            timeout=self.timeout,
-        ) as resp:
-            if resp.status == 200:
-                return await resp.json()
-            else:
+        retries = 0
+        while True:
+            data = {"scope": scope, "client_id": client_id}
+            if service:
+                data["service_token"] = await self.service_token
+            async with aiohttp_client.post(
+                url,
+                data=json.dumps(data),
+                headers={"Authorization": request.headers.get("Authorization", "")},
+                timeout=self.timeout,
+            ) as resp:
+                if resp.status == 200:
+                    return await resp.json()
                 text = await resp.text(encoding="utf-8")
+                if resp.status in RETRIABLE_CODES and retries < 3:
+                    logger.warning(f"Error getting metadata: {resp.status} {text}, retrying")
+                    if resp.status == 484:
+                        await self.refresh_service_token()
+                    else:
+                        await asyncio.sleep(0.05)
+                    retries += 1
+                    continue
                 logger.warning("Error getting metadata: " f"{resp.status}: {text}", exc_info=True)
+                return
 
     async def add_scope(self, scope, admin_user, urls=None):
         if urls is None:

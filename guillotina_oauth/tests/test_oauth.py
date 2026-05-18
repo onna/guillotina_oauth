@@ -31,3 +31,21 @@ async def test_should_set_user_metadata(dummy_guillotina):
                 resp = await oauth_utility.set_user_metadata("canonical", {"test": "1"})
 
                 assert resp == 200
+
+
+@pytest.mark.asyncio
+async def test_get_account_metadata_retries_on_484(dummy_guillotina):
+    with aioresponses() as mock:
+        mock.post("http://localhost/get_metadata_by_service", status=484)
+        mock.post(
+            "http://localhost/get_metadata_by_service",
+            payload={"parent_site_id": "parent"},
+            status=200,
+        )
+        oauth_utility = get_utility(IOAuth)
+
+        with patch("guillotina_oauth.oauth.get_current_request", return_value=MockRequest()):
+            with patch.object(OAuth, "refresh_service_token", return_value=async_val("new-token")):
+                result = await oauth_utility.get_account_metadata("child", service=True)
+
+        assert result == {"parent_site_id": "parent"}
