@@ -1,3 +1,8 @@
+5.1.4
+-----
+
+- Retry account metadata fetch on expired service token (484)
+
 5.1.3
 -----
 
