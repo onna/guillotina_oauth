@@ -49,6 +49,13 @@ USER_CACHE = LRU(1000)
 RETRIABLE_CODES = (484, 503)
 
 
+class _RetryMetadata(Exception):
+    def __init__(self, status, text):
+        super().__init__(status, text)
+        self.status = status
+        self.text = text
+
+
 class IOAuth(IAsyncUtility):
     """Marker interface for OAuth Utility."""
 
@@ -395,36 +402,34 @@ class OAuth(object):
                 text = await resp.text(encoding="utf-8")
                 logger.warning("Error modifying limit: " f"{resp.status}: {text}", exc_info=True)
 
+    @backoff.on_exception(
+        backoff.constant,
+        _RetryMetadata,
+        max_tries=4,
+        interval=0.05,
+        raise_on_giveup=False,
+    )
     async def get_account_metadata(self, scope, client_id="", service=False):
         request = get_current_request()
+        url = join(self.server, "get_metadata_by_service" if service else "get_metadata")
+        data = {"scope": scope, "client_id": client_id}
         if service:
-            url = join(self.server, "get_metadata_by_service")
-        else:
-            url = join(self.server, "get_metadata")
-        retries = 0
-        while True:
-            data = {"scope": scope, "client_id": client_id}
-            if service:
-                data["service_token"] = await self.service_token
-            async with aiohttp_client.post(
-                url,
-                data=json.dumps(data),
-                headers={"Authorization": request.headers.get("Authorization", "")},
-                timeout=self.timeout,
-            ) as resp:
-                if resp.status == 200:
-                    return await resp.json()
-                text = await resp.text(encoding="utf-8")
-                if resp.status in RETRIABLE_CODES and retries < 3:
-                    logger.warning(f"Error getting metadata: {resp.status} {text}, retrying")
-                    if resp.status == 484:
-                        await self.refresh_service_token()
-                    else:
-                        await asyncio.sleep(0.05)
-                    retries += 1
-                    continue
-                logger.warning("Error getting metadata: " f"{resp.status}: {text}", exc_info=True)
-                return
+            data["service_token"] = await self.service_token
+        async with aiohttp_client.post(
+            url,
+            data=json.dumps(data),
+            headers={"Authorization": request.headers.get("Authorization", "")},
+            timeout=self.timeout,
+        ) as resp:
+            if resp.status == 200:
+                return await resp.json()
+            text = await resp.text(encoding="utf-8")
+            if resp.status in RETRIABLE_CODES:
+                logger.warning(f"Error getting metadata: {resp.status} {text}, retrying")
+                if resp.status == 484:
+                    await self.refresh_service_token()
+                raise _RetryMetadata(resp.status, text)
+            logger.warning(f"Error getting metadata: {resp.status}: {text}", exc_info=True)
 
     async def add_scope(self, scope, admin_user, urls=None):
         if urls is None:
