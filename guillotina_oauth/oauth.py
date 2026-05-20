@@ -402,14 +402,22 @@ class OAuth(object):
                 text = await resp.text(encoding="utf-8")
                 logger.warning("Error modifying limit: " f"{resp.status}: {text}", exc_info=True)
 
+    async def get_account_metadata(self, scope, client_id="", service=False):
+        try:
+            return await self._fetch_account_metadata(scope, client_id, service)
+        except _RetryMetadata as exc:
+            logger.warning(
+                f"Error getting metadata: {exc.status} {exc.text}, retries exhausted",
+                exc_info=True,
+            )
+
     @backoff.on_exception(
         backoff.constant,
         _RetryMetadata,
         max_tries=4,
         interval=0.05,
-        raise_on_giveup=False,
     )
-    async def get_account_metadata(self, scope, client_id="", service=False):
+    async def _fetch_account_metadata(self, scope, client_id, service):
         request = get_current_request()
         url = join(self.server, "get_metadata_by_service" if service else "get_metadata")
         data = {"scope": scope, "client_id": client_id}

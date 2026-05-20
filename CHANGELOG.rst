@@ -1,3 +1,8 @@
+5.1.5
+-----
+
+- Drop 'raise_on_giveup' on metadata retry decorator so backoff 1.x remains compatible
+
 5.1.4
 -----
 
